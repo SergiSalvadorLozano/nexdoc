@@ -1,0 +1,13 @@
+{
+	"name": "Nexdoc",
+	"version": "0.0.1",
+	"dependencies":
+	{
+		"express": "~4.5.0",
+		"express-handlebars": "*",
+		"pg": "*",
+		"body-parser": "*",
+		"mocha": "*",
+		"selenium-webdriver": "*"
+	}
+}

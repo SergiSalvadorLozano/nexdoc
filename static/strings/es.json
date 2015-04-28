@@ -1,0 +1,15 @@
+{
+	"common": {
+		"sections": {
+			"home": "Inicio"
+		}
+	},
+	"home": {
+		"subsections": {
+			"welcome": "Bienvenida"
+		},
+		"welcome": {
+			"welcomeText" : "Bienvenido/a!"
+		}
+	}
+}

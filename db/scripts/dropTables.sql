@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS "answer";
+
+DROP TABLE IF EXISTS "proposed";
+
+DROP TABLE IF EXISTS "exercise";
+
+DROP TABLE IF EXISTS "comment";
+
+DROP TABLE IF EXISTS "groupConversation";
+
+DROP TABLE IF EXISTS "conversation";
+
+DROP TABLE IF EXISTS "member";
+
+DROP TABLE IF EXISTS "group";
+
+DROP TABLE IF EXISTS "contact";
+
+DROP TABLE IF EXISTS "user"
