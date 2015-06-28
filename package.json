@@ -1,13 +1,13 @@
 {
-	"name": "Nexdoc",
-	"version": "0.0.1",
-	"dependencies":
-	{
-		"express": "~4.5.0",
-		"express-handlebars": "*",
-		"pg": "*",
-		"body-parser": "*",
-		"mocha": "*",
-		"selenium-webdriver": "*"
-	}
+  "name": "nexdoc",
+  "version": "0.0.2",
+  "dependencies": {
+    "express": "~4.9.0",
+    "body-parser": "*",
+    "bluebird": "*",
+    "jade": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "sequelize": "*"
+  }
 }
