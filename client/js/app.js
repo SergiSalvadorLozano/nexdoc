@@ -2,6 +2,6 @@
 
 (function () {
 
-  angular.module('nexdocApp', ['ngRoute']);
+  angular.module('nexdocApp', ['ngRoute', 'ngCookies']);
 
 })();

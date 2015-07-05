@@ -1,5 +1,5 @@
 doctype html
-html(ng-app='nexdocApp')
+html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
   head
     title Nexdoc
     meta(charset='utf8')
@@ -13,8 +13,24 @@ html(ng-app='nexdocApp')
     
     // Angular app.
     script(src='/js/app.js')
+    
+    // Angular routing.
     script(src='/js/routes/main.js')
+    
+    // Angular controllers.
+    script(src='/js/controllers/global.js')
+    
+    
 
   body
-    h1 Nexdoc
+    header
+      h1 Nexdoc
+      .userArea(ng-if='isLoggedIn')
+        p {{user.username}}
+        input(type='button', value='Sign out', ng-click='signOut()')
+      .loginArea(ng-if='!isLoggedIn')
+        form(ng-submit='signIn()')
+          input(type='text', placeholder='username', ng-model='loginForm.username')
+          input(type='password', placeholder='password', ng-model='loginForm.password')
+          input(type='submit', value='Sign in')
     div(ng-view)

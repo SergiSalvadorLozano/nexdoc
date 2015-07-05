@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function (express) {
+module.exports = function (express, auth) {
   var router = express.Router({mergeParams: true});
 
   // Home partials.

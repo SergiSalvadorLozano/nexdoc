@@ -2,20 +2,18 @@
 
 var express = require('express'),
   bodyParser = require('body-parser'),
-  // passport = require('./routes/authentication'),
+  path = require('path'),
   // models = require('./models'),
-  router = require('./routes/main')(express),
-  path = require('path');
+  auth = require('./controllers/authentication'),
+  router = require('./routes/main')(express, auth);
 
 var port = 8000;
 
 var app = express();
 
-
 // Global middleware.
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-//app.use(passport.initialize());
 
 // Directory shortcuts.
 app.use(express.static(path.join(__dirname, 'client')));
