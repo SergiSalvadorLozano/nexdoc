@@ -3,13 +3,12 @@
 module.exports = function (){
   var auth = {};
 
+
   // DEPENDENCIES
 
-  var passport = require('passport')
-    , Promise = require('bluebird')
-    , LocalStrategy = require('passport-local')
-    , userCtrl = require('./user')
-    , sessionCtrl = require('./session');
+  var Promise = require('bluebird')
+    , userCtrl = require('./user');
+
 
   // HELPER FUNCTIONS
 
@@ -24,10 +23,12 @@ module.exports = function (){
     return authorised;
   };
 
+
   // Checks whether a user's token is valid (hasn't expired).
-  var _checkTokenValidity = function (user, userId) {
-    return !user.idTokenExpiry || user.idTokenExpiry >= Date.now();
+  var _checkTokenValidity = function (user) {
+    return !user.idTokenExpiry || user.idTokenExpiry >= new Date();
   };
+
 
   // Checks whether a user's identity corresponds with the one required.
   var _checkUserIdentity = function (user, userId) {
@@ -35,9 +36,11 @@ module.exports = function (){
   };
 
 
-  auth.authenticate = function (idToken, reqUserId, reqPerm) {
-    userId = typeof reqUserId !== 'undefined' ? reqUserId : null;
-    reqPerm = typeof reqPerm !== 'undefined' ? reqPerm : [];
+  // Checks whether a given idToken is valid, and belongs to a user who fulfills
+  // permission (and optionally identity) requirements.
+  // Returns a promise that resolves to a User model or null, respectively.
+  var _authenticate = function (idToken, reqUserId, reqPerm) {
+    console.log(idToken + ' ' + reqUserId + ' ' + reqPerm);
 
     return new Promise (function (resolve, reject) {
       userCtrl.findOne({idToken: idToken})
@@ -54,35 +57,76 @@ module.exports = function (){
     });
   };
 
-  // auth.authenticate('abcd', 1, ['p2', 'p1'])
-  //   .then(function (user) {
-  //     console.log(user);
-  //   });
 
+
+  var checks = {
+
+    identity: {
+      method: function (reqProperty, userIdParam) {
+        return function (req) {
+
+        }
+      }
+    }
+
+  };
+
+
+  // Generates an aphanumeric string to be used as ID Token.
+  var _generateString = function () {
+    var str = ''
+      , strLength = 100
+      , strChars = '0123456789' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+          'abcdefghijklmnopqrstuvwxyz';
+
+    for (var i = 0 ; i < strLength ; i += 1)
+      str += strChars.charAt(Math.floor(Math.random() * strChars.length));
+    return str;
+  };
+
+
+  // Returns the current date plus a set amount of time.
+  var _soon = function () {
+    var plusMinutes = 30;
+    return new Date(Date.now() + plusMinutes * 60000);
+  };
+
+
+  // FUNCTIONALITY
+
+  // Returns an Express middleware that verifies the idToken passed in the
+  // 'authentication' header, plus other optional conditions.
+  // PARAMETERS
+  // [@reqPerm]: array of strings with permission requirements.
+  // [@self]: boolean enabling identity validation against 'req.params.userId'.
+  // RETURNS
+  // An express middleware function. If successful, passes the user model to the
+  // next function in 'req.user'. If validation fails sends a 401 code in the
+  // response, or a 500 code if there has been a server error.
   auth.getMiddleware = function (reqPerm, self) {
     return function (req, res, next) {
-      req.body.idToken = req.headers['authentication'];
-      req.body.reqPerm = reqPerm;
-      req.body.username = req.headers['auth-username'];
-      req.body.password = req.headers['auth-password'];
+      var idToken = req.headers['authentication']
+        , reqUserId = null;
 
-      passport.authenticate('local', function (err, user) {
-        // Server error during Passport authentication.
-        if (err)
+      if (typeof reqPerm === 'undefined')
+        reqPerm = [];
+
+      if (self && typeof req.params.userId !== 'undefined')
+        reqUserId = req.params.userId;
+
+      _authenticate(idToken, reqUserId, reqPerm)
+        .then(function (user) {
+          if (user) {
+            req.user = user;
+            next();
+          }
+          else
+            res.sendStatus(401);
+        })
+        .catch(function (err) {
+          console.log('ERROR: ' + err);
           res.sendStatus(500);
-        // Incorrect ID token.
-        else if (!user)
-          res.sendStatus(401);
-        else {
-          // Check permissions.
-          /*var authorised = true
-            , userPerm = JSON.parse(user.permissions);*/
-
-
-          req.user = user;
-          next();
-        }
-      }, { session: false })(req, res);
+        });
     };
   };
 
@@ -94,41 +138,32 @@ module.exports = function (){
 
 
 
-
-
-
-  // PASSPORT STRATEGIES
-
-  // User strategy. Accepts any registered user.
-  /*passport.use('local', new LocalStrategy( {usernameField: 'idToken',
-    passwordField: 'reqPerm'}, function (username, password, done) {
-
-    userCtrl.findOne({username: username, password: password})
-      .then(function (user) {
-        if (user)
-          return done(null, user);
-        else
-          return done(null, false);
-      })
-      .catch(function (err) {
-        return done(err, false);
-      });
-  }));*/
-
-  // FUNCTIONALITY
-
-  // Returns an Express middleware that authenticates through Passport.
-  // Additionally, checks that the user possesses the required permissions.
-
-
-
-  auth.signIn = function (username, password) {
-
+  // Not working.
+  auth.signIn = function (username, password, permanence) {
+    return new Promise (function (resolve, reject) {
+      userCtrl.findOne({username: username, password: password})
+        .then(function (user) {
+          if (!user)
+            return Promise.resolve(null);
+          var newValues = { idToken: _generateString() };
+          newValues.idTokenExpiry = permanence ? null : _soon();
+          return userCtrl.updateOne({id: user.id}, newValues);
+        })
+        .then(function (user) {
+          resolve(user);
+        })
+        .catch(function (err) {
+          reject(err);
+        })
+    });
   };
 
 
+  auth.signIn('Alice', '1234', false)
+    .then(function (user) {
+      console.log('USER: ' + JSON.stringify(user));
+    });
 
 
-  auth.passport = passport;
   return auth;
 }();
