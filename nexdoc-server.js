@@ -1,11 +1,11 @@
 'use strict';
 
-var express = require('express'),
-  bodyParser = require('body-parser'),
-  path = require('path'),
-  // models = require('./models'),
-  auth = require('./controllers/authentication'),
-  router = require('./routes/main')(express, auth);
+var express = require('express')
+  , bodyParser = require('body-parser')
+  , path = require('path')
+  // , models = require('./models')
+  , auth = require('./controllers/authentication')
+  , router = require('./routes/main')(express, auth);
 
 var port = 8000;
 
