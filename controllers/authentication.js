@@ -7,22 +7,56 @@ module.exports = function (){
   // DEPENDENCIES
 
   var Promise = require('bluebird')
-    , userCtrl = require('./user');
+    , userCtrl = require('./user')
+    , comHlp = require('../helpers/common');
 
 
-  // HELPER FUNCTIONS
+  // PRIVATE ATTRIBUTES
 
-  // Checks whether a given user possesses the required permissions.
-  var _checkUserPermissions = function (user, reqPerm) {
-    var authorised = true
-      , userPerm = JSON.parse(user.permissions);
-    reqPerm.forEach(function (permission) {
-      if (userPerm.indexOf(permission) < 0)
-        authorised = false;
-    });
-    return authorised;
+  // Custom authentication checks
+  var checks = {
+
+    // Checks that the requesting user has a given id.
+    identity: {
+      method: function (userIdLoc) {
+        if (typeof userIdLoc === 'undefined')
+          userIdLoc = {
+            prop: 'params',
+            param: 'userId'
+          };
+        return function (req) {
+          return new Promise (function (resolve) {
+            console.log(userIdLoc);
+            resolve(req.user.id === req[userIdLoc.prop][userIdLoc.param]);
+          });
+        };
+      },
+      error: {
+        code: 401,
+        data: 'User\'s identity mismatch.'
+      }
+    },
+
+    // Checks that the requesting user has a given permission.
+    permission: {
+      method: function (permReq) {
+        return function (req) {
+          return new Promise (function (resolve) {
+            resolve(true);
+          });
+        };
+      },
+      error: {
+        code: 401,
+        data: 'Insufficient permissions for request.'
+      }
+    }
+
+    // Add more custom checks here.
   };
 
+
+  // LOCAL HELPERS
 
   // Checks whether a user's token is valid (hasn't expired).
   var _checkTokenValidity = function (user) {
@@ -30,66 +64,156 @@ module.exports = function (){
   };
 
 
-  // Checks whether a user's identity corresponds with the one required.
-  var _checkUserIdentity = function (user, userId) {
-    return user.id === userId;
+  // Resolves a checklist.
+  // Returned promise resolves to an object {verdict: boolean, resErr: object}.
+  // - verdict is true only if no checks resolve to false.
+  // - resErr is the error produced by the first check to fail, or undefined.
+  var _resolveCheckList = function (req, checkList) {
+    return new Promise (function (resolve, reject) {
+      if (checkList.length <= 0)
+        resolve({verdict: true});
+      else {
+        var check = checks[checkList[0].name];
+        check.method.apply(this, checkList[0].args)(req)
+          .then(function (verdict) {
+            if (verdict)
+              _resolveCheckList(req, checkList.slice(1))
+                .then(function (result) {
+                  resolve(result);
+                })
+                .catch(comHlp.rejectPromise(reject));
+            else
+              resolve({verdict: false, resErr: check.error});
+          })
+          .catch(comHlp.rejectPromise(reject));
+      }
+    });
   };
 
 
-  // Checks whether a given idToken is valid, and belongs to a user who fulfills
-  // permission (and optionally identity) requirements.
-  // Returns a promise that resolves to a User model or null, respectively.
-  var _authenticate = function (idToken, reqUserId, reqPerm) {
-    console.log(idToken + ' ' + reqUserId + ' ' + reqPerm);
-
+  // Resolves a list of checklists.
+  // Returned promise resolves to an object {verdict: boolean, resErr: object}.
+  // - verdict is true if at least one checklist has a true verdict.
+  // - resErr is the error given by parameter. If undefined, it is the error
+  //  produced by the first checklist to fail. Undefined for true verdicts.
+  var _resolveCheckLists = function (req, checkLists, firstResErr) {
     return new Promise (function (resolve, reject) {
-      userCtrl.findOne({idToken: idToken})
+      if (checkLists.length === 0)
+        resolve({verdict: false, resErr: firstResErr});
+      else {
+        _resolveCheckList(req, checkLists[0])
+          .then(function (result) {
+            if (result.verdict)
+              resolve(result);
+            else {
+              var resErr = firstResErr ? firstResErr : result.resErr;
+              _resolveCheckLists(req, checkLists.slice(1), resErr)
+                .then(function (result) {
+                  resolve(result);
+                })
+                .catch(comHlp.rejectPromise(reject));
+            }
+          })
+          .catch(comHlp.rejectPromise(reject));
+      }
+    });
+  };
+
+
+  // FUNCTIONALITY
+
+  //
+  auth.authMiddleware = function (checkLists, idTokenLoc, resErr){
+    if (!checkLists || checkLists.length === 0)
+      checkLists = [[]];
+    if (!idTokenLoc)
+      idTokenLoc = {
+        prop: 'headers',
+        param: 'authentication'
+      };
+    return function (req, res, next) {
+      userCtrl.findOne({idToken: req[idTokenLoc.prop][idTokenLoc.param]})
         .then(function (user) {
-          if (user && _checkTokenValidity(user) &&
-            _checkUserPermissions(user, reqPerm) &&
-            (reqUserId === null || _checkUserIdentity(user, reqUserId)))
-            resolve(user);
-          resolve(null);
+          if (user && _checkTokenValidity(user)) {
+            req.user = user;
+            return _resolveCheckLists(req, checkLists, resErr);
+          }
+          else
+            return Promise.resolve({verdict: false, resErr: tokenAuthError});
+        })
+        .then(function (result) {
+          if (result.verdict)
+            next();
+          else
+            res.status(result.resErr.code).json(result.resErr.data);
+        })
+        .catch(function (err) {
+          console.log(err);
+          res.sendStatus(500);
+        });
+    };
+  };
+
+
+  // Not working.
+  auth.signIn = function (username, password, permanence) {
+    return new Promise (function (resolve, reject) {
+      userCtrl.findOne({username: username, password: password})
+        .then(function (user) {
+          console.log('USER: ' + JSON.stringify(user));
+          if (!user)
+            return Promise.resolve(null);
+          var newValues = { idToken: _generateString() };
+          newValues.idTokenExpiry = permanence ? null : comHlp.soon();
+          return userCtrl.updateOne({id: user.id}, newValues);
+        })
+        .then(function (user) {
+          console.log('USER: ' + JSON.stringify(user));
+          resolve(user);
         })
         .catch(function (err) {
           reject(err);
-        });
+        })
     });
   };
 
 
 
-  var checks = {
+  auth.signIn('Alice', '1234', false)
+    .then(function (user) {
+      console.log('USER: ' + JSON.stringify(user));
+    });
 
-    identity: {
-      method: function (reqProperty, userIdParam) {
-        return function (req) {
 
-        }
-      }
+  /*var next = function () {
+    console.log('PASSED THE TESTS!')
+  };
+
+  var req = {
+    headers: {authentication: 'lol'},
+    params: {userId: 0}
+  };
+
+  var res = {
+    status: function (code) {
+      console.log('ERROR CODE: ' + code);
+      return this;
+    },
+    sendStatus: function (code) {
+      console.log('ERROR CODE: ' + code);
+    },
+    json: function (data) {
+      console.log('ERROR DATA: ' + data);
     }
-
   };
 
+  var cls = [
+    [{name: 'permission', args: ['something']}],
+    [{name: 'identity'}]
+  ];
 
-  // Generates an aphanumeric string to be used as ID Token.
-  var _generateString = function () {
-    var str = ''
-      , strLength = 100
-      , strChars = '0123456789' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-          'abcdefghijklmnopqrstuvwxyz';
+  auth.authMiddleware(cls)(req, res, next);*/
 
-    for (var i = 0 ; i < strLength ; i += 1)
-      str += strChars.charAt(Math.floor(Math.random() * strChars.length));
-    return str;
-  };
-
-
-  // Returns the current date plus a set amount of time.
-  var _soon = function () {
-    var plusMinutes = 30;
-    return new Date(Date.now() + plusMinutes * 60000);
-  };
 
 
   // FUNCTIONALITY
@@ -103,7 +227,7 @@ module.exports = function (){
   // An express middleware function. If successful, passes the user model to the
   // next function in 'req.user'. If validation fails sends a 401 code in the
   // response, or a 500 code if there has been a server error.
-  auth.getMiddleware = function (reqPerm, self) {
+  /*auth.getMiddleware = function (reqPerm, self) {
     return function (req, res, next) {
       var idToken = req.headers['authentication']
         , reqUserId = null;
@@ -128,7 +252,7 @@ module.exports = function (){
           res.sendStatus(500);
         });
     };
-  };
+  };*/
 
 
 
@@ -138,31 +262,10 @@ module.exports = function (){
 
 
 
-  // Not working.
-  auth.signIn = function (username, password, permanence) {
-    return new Promise (function (resolve, reject) {
-      userCtrl.findOne({username: username, password: password})
-        .then(function (user) {
-          if (!user)
-            return Promise.resolve(null);
-          var newValues = { idToken: _generateString() };
-          newValues.idTokenExpiry = permanence ? null : _soon();
-          return userCtrl.updateOne({id: user.id}, newValues);
-        })
-        .then(function (user) {
-          resolve(user);
-        })
-        .catch(function (err) {
-          reject(err);
-        })
-    });
-  };
 
 
-  auth.signIn('Alice', '1234', false)
-    .then(function (user) {
-      console.log('USER: ' + JSON.stringify(user));
-    });
+
+
 
 
   return auth;
