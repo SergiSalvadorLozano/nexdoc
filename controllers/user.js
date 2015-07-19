@@ -4,7 +4,8 @@
 module.exports = function (){
   var userCtrl = {};
 
-  var Promise = require('bluebird');
+  var Promise = require('bluebird')
+    , comHlp = require('../helpers/common');
 
   var database = [
     {
@@ -44,15 +45,30 @@ module.exports = function (){
 
   userCtrl.updateOne = function (values, newValues) {
     return new Promise (function (resolve, reject) {
-      var user = userCtrl.findOne(values);
-      if (user) {
-        Object.keys(newValues).forEach(function (attr) {
-          user[attr] = newValues[attr];
+      for (var i = 0 ; i < database.length ; i += 1) {
+        var fulfills = true;
+        Object.keys(values).forEach(function (attr) {
+          if (database[i][attr] !== values[attr])
+            fulfills = false;
         });
+        if (fulfills){
+          Object.keys(newValues).forEach(function (attr) {
+            database[i][attr] = newValues[attr];
+          });
+          resolve(database[i]);
+          return;
+        }
       }
-      resolve(user);
+      resolve(null);
     });
   };
+
+
+  userCtrl.refreshIdToken = function (userId, permanence) {
+    var expiry = permanence ? null : comHlp.soon(30);
+    userCtrl.updateOne({id: userId}, {idTokenExpiry: expiry});
+  };
+
 
   return userCtrl;
 }();
