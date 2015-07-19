@@ -160,15 +160,13 @@ module.exports = function (){
     return new Promise (function (resolve, reject) {
       userCtrl.findOne({username: username, password: password})
         .then(function (user) {
-          console.log('USER: ' + JSON.stringify(user));
           if (!user)
             return Promise.resolve(null);
-          var newValues = { idToken: _generateString() };
-          newValues.idTokenExpiry = permanence ? null : comHlp.soon();
+          var newValues = { idToken: comHlp.generateString(100) };
+          newValues.idTokenExpiry = permanence ? null : comHlp.soon(30);
           return userCtrl.updateOne({id: user.id}, newValues);
         })
         .then(function (user) {
-          console.log('USER: ' + JSON.stringify(user));
           resolve(user);
         })
         .catch(function (err) {
