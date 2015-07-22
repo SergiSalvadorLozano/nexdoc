@@ -5,7 +5,7 @@ var express = require('express')
   , path = require('path')
   // , models = require('./models')
   , auth = require('./controllers/authentication')
-  , router = require('./routes/main')(express, auth);
+  , router = require('./routes/main');
 
 var port = 8000;
 

@@ -5,22 +5,23 @@ module.exports = function (){
   var userCtrl = {};
 
   var Promise = require('bluebird')
+    , permCfg = require('../config/permissions')
     , comHlp = require('../helpers/common');
 
   var database = [
     {
-      id: 0,
+      id: 1,
       username: 'Alice',
       password: '1234',
-      permissions: JSON.stringify(['p1']),
+      role: permCfg.roles['admin'],
       idToken: 'lol',
       idTokenExpiry: null
     },
     {
-      id: 1,
+      id: 2,
       username: 'Bob',
       password: '4321',
-      permissions: JSON.stringify(['p1','p2']),
+      role: permCfg.roles['user'],
       idToken: 'abcd',
       idTokenExpiry: null
     }
@@ -61,12 +62,6 @@ module.exports = function (){
       }
       resolve(null);
     });
-  };
-
-
-  userCtrl.refreshIdToken = function (userId, permanence) {
-    var expiry = permanence ? null : comHlp.soon(30);
-    userCtrl.updateOne({id: userId}, {idTokenExpiry: expiry});
   };
 
 

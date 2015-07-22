@@ -8,7 +8,8 @@ module.exports = function (){
 
   var Promise = require('bluebird')
     , userCtrl = require('./user')
-    , comHlp = require('../helpers/common');
+    , comHlp = require('../helpers/common')
+    , permCfg = require('../config/permissions');
 
 
   // PRIVATE ATTRIBUTES
@@ -16,7 +17,7 @@ module.exports = function (){
   // Custom authentication checks
   var checks = {
 
-    // Checks that the requesting user has a given id.
+    // Verifies that the requesting user has the given id.
     identity: {
       method: function (userIdLoc) {
         if (typeof userIdLoc === 'undefined')
@@ -26,23 +27,23 @@ module.exports = function (){
           };
         return function (req) {
           return new Promise (function (resolve) {
-            console.log(userIdLoc);
             resolve(req.user.id === req[userIdLoc.prop][userIdLoc.param]);
           });
         };
       },
       error: {
         code: 401,
-        data: 'User\'s identity mismatch.'
+        data: 'User identity mismatch.'
       }
     },
 
-    // Checks that the requesting user has a given permission.
+    // Verifies that the requesting user has the given permission.
     permission: {
       method: function (permReq) {
         return function (req) {
           return new Promise (function (resolve) {
-            resolve(true);
+            var perms = permCfg.permissions[req.user.role];
+            resolve(perms.indexOf(permReq) >= 0);
           });
         };
       },
@@ -74,7 +75,7 @@ module.exports = function (){
         resolve({verdict: true});
       else {
         var check = checks[checkList[0].name];
-        check.method.apply(this, checkList[0].args)(req)
+        check.method.apply(null, checkList[0].args)(req)
           .then(function (verdict) {
             if (verdict)
               _resolveCheckList(req, checkList.slice(1))
@@ -155,6 +156,13 @@ module.exports = function (){
   };
 
 
+  //
+  auth.refreshIdToken = function (userId, permanence) {
+    var expiry = permanence ? null : comHlp.soon(30);
+    userCtrl.updateOne({id: userId}, {idTokenExpiry: expiry});
+  };
+
+
   // Not working.
   auth.signIn = function (username, password, permanence) {
     return new Promise (function (resolve, reject) {
@@ -175,21 +183,9 @@ module.exports = function (){
     });
   };
 
-
-
-  auth.signIn('Alice', '1234', false)
-    .then(function (user) {
-      console.log('USER: ' + JSON.stringify(user));
-    });
-
-
-  /*var next = function () {
+  /*
+  var next = function () {
     console.log('PASSED THE TESTS!')
-  };
-
-  var req = {
-    headers: {authentication: 'lol'},
-    params: {userId: 0}
   };
 
   var res = {
@@ -205,65 +201,21 @@ module.exports = function (){
     }
   };
 
-  var cls = [
-    [{name: 'permission', args: ['something']}],
-    [{name: 'identity'}]
-  ];
+  auth.signIn('Alice', '1234', false)
+    .then(function (user) {
+      var req = {
+        headers: {authentication: user.idToken},
+        params: {userId: 2}
+      };
 
-  auth.authMiddleware(cls)(req, res, next);*/
-
-
-
-  // FUNCTIONALITY
-
-  // Returns an Express middleware that verifies the idToken passed in the
-  // 'authentication' header, plus other optional conditions.
-  // PARAMETERS
-  // [@reqPerm]: array of strings with permission requirements.
-  // [@self]: boolean enabling identity validation against 'req.params.userId'.
-  // RETURNS
-  // An express middleware function. If successful, passes the user model to the
-  // next function in 'req.user'. If validation fails sends a 401 code in the
-  // response, or a 500 code if there has been a server error.
-  /*auth.getMiddleware = function (reqPerm, self) {
-    return function (req, res, next) {
-      var idToken = req.headers['authentication']
-        , reqUserId = null;
-
-      if (typeof reqPerm === 'undefined')
-        reqPerm = [];
-
-      if (self && typeof req.params.userId !== 'undefined')
-        reqUserId = req.params.userId;
-
-      _authenticate(idToken, reqUserId, reqPerm)
-        .then(function (user) {
-          if (user) {
-            req.user = user;
-            next();
-          }
-          else
-            res.sendStatus(401);
-        })
-        .catch(function (err) {
-          console.log('ERROR: ' + err);
-          res.sendStatus(500);
-        });
-    };
-  };*/
-
-
-
-
-
-
-
-
-
-
-
-
-
+      var cls = [
+        [{name: 'permission', args: ['viewOwnProfile']},
+          {name: 'identity'}],
+        [{name: 'permission', args: ['viewAllProfiles']}]
+      ];
+      auth.authMiddleware(cls)(req, res, next);
+    });
+  */
 
 
   return auth;
