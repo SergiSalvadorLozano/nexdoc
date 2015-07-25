@@ -7,12 +7,27 @@ module.exports = function (){
   // DEPENDENCIES
 
   var Promise = require('bluebird')
+    , cryptoJS = require('crypto-js')
     , userCtrl = require('./user')
     , comHlp = require('../helpers/common')
     , permCfg = require('../config/permissions');
 
 
   // PRIVATE ATTRIBUTES
+
+  // Error returned when the credentials sent in the request are invalid.
+  var credentialsError = {
+    code: 401,
+    data: 'Invalid credentials provided in request.'
+  };
+
+
+  // Error returned when the credentials sent in the request are invalid.
+  var serverError = {
+    code: 500,
+    data: 'Server error during authentication.'
+  };
+
 
   // Custom authentication checks
   var checks = {
@@ -59,9 +74,11 @@ module.exports = function (){
 
   // LOCAL HELPERS
 
-  // Checks whether a user's token is valid (hasn't expired).
-  var _checkTokenValidity = function (user) {
-    return !user.idTokenExpiry || user.idTokenExpiry >= new Date();
+  // Verifies a given signature corresponds with a given email-password pair.
+  var _verifySignature = function (signature, email, password) {
+    var realSignature = cryptoJS.HmacSHA256(email, password)
+      .toString(cryptoJS.enc.Base64);
+    return signature === realSignature;
   };
 
 
@@ -124,68 +141,52 @@ module.exports = function (){
   // FUNCTIONALITY
 
   //
-  auth.authMiddleware = function (checkLists, idTokenLoc, resErr){
-    if (!checkLists || checkLists.length === 0)
-      checkLists = [[]];
-    if (!idTokenLoc)
-      idTokenLoc = {
+  auth.authMiddleware = function (checkLists, emailLoc, signatureLoc, resErr,
+    options){
+
+    checkLists = checkLists && checkLists.length > 0 ? checkLists : [[]];
+    if (!emailLoc)
+      emailLoc = {
         prop: 'headers',
-        param: 'authentication'
+        param: 'nd-auth-email'
       };
+    if (!signatureLoc)
+      signatureLoc = {
+        prop: 'headers',
+        param: 'nd-auth-signature'
+      };
+    resErr = resErr ? resErr : null;
+    options = options ? options : {};
+
     return function (req, res, next) {
-      userCtrl.findOne({idToken: req[idTokenLoc.prop][idTokenLoc.param]})
+      var email = req[emailLoc.prop][emailLoc.param]
+        , signature = req[signatureLoc.prop][signatureLoc.param];
+      userCtrl.findOne({email: email})
         .then(function (user) {
-          if (user && _checkTokenValidity(user)) {
+          if (user && _verifySignature(signature, user.email, user.password)) {
             req.user = user;
             return _resolveCheckLists(req, checkLists, resErr);
           }
           else
-            return Promise.resolve({verdict: false, resErr: tokenAuthError});
+            return Promise.resolve({verdict: false, resErr: credentialsError});
         })
         .then(function (result) {
           if (result.verdict)
             next();
           else
-            res.status(result.resErr.code).json(result.resErr.data);
+            res.status(result.resErr.code)
+              .json({data: result.resErr.data, options: options});
         })
         .catch(function (err) {
           console.log(err);
-          res.sendStatus(500);
+          res.status(serverError.code)
+            .json({data: serverError.data, options: options});
         });
     };
   };
 
 
-  //
-  auth.refreshIdToken = function (userId, permanence) {
-    var expiry = permanence ? null : comHlp.soon(30);
-    userCtrl.updateOne({id: userId}, {idTokenExpiry: expiry});
-  };
-
-
-  // Not working.
-  auth.signIn = function (username, password) {
-    return new Promise (function (resolve, reject) {
-      userCtrl.findOne({username: username, password: password})
-        .then(function (user) {
-          if (!user)
-            return Promise.resolve(null);
-          var newValues = {
-            idToken: comHlp.generateString(100),
-          };
-          return userCtrl.updateOne({id: user.id}, newValues);
-        })
-        .then(function (user) {
-          resolve(user);
-        })
-        .catch(function (err) {
-          reject(err);
-        })
-    });
-  };
-
-  /*
-  var next = function () {
+  /*var next = function () {
     console.log('PASSED THE TESTS!')
   };
 
@@ -202,21 +203,23 @@ module.exports = function (){
     }
   };
 
-  auth.signIn('Alice', '1234', false)
-    .then(function (user) {
-      var req = {
-        headers: {authentication: user.idToken},
-        params: {userId: 2}
-      };
+  var req = {
+    headers: {
+      'nd-auth-email': 'alice@example.com',
+      'nd-auth-signature': cryptoJS.HmacSHA256('alice@example.com', '1234')
+        .toString(cryptoJS.enc.Base64)
+    },
+    params: {userId: 2}
+  };
 
-      var cls = [
-        [{name: 'permission', args: ['viewOwnProfile']},
-          {name: 'identity'}],
-        [{name: 'permission', args: ['viewAllProfiles']}]
-      ];
-      auth.authMiddleware(cls)(req, res, next);
-    });
-  */
+  var cls = [
+    [{name: 'permission', args: ['viewOwnProfile']},
+      {name: 'identity'}],
+    [{name: 'permission', args: ['viewAllProfiles']}]
+  ];
+
+  auth.authMiddleware(cls)(req, res, next);*/
+
 
 
   return auth;

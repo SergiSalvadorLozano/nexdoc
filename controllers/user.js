@@ -11,19 +11,15 @@ module.exports = function (){
   var database = [
     {
       id: 1,
-      username: 'Alice',
+      email: 'alice@example.com',
       password: '1234',
-      role: permCfg.roles['admin'],
-      idToken: 'lol',
-      idTokenExpiry: null
+      role: permCfg.roles['admin']
     },
     {
       id: 2,
-      username: 'Bob',
+      email: 'bob@example.com',
       password: '4321',
-      role: permCfg.roles['user'],
-      idToken: 'abcd',
-      idTokenExpiry: null
+      role: permCfg.roles['user']
     }
   ];
 

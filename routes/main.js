@@ -19,24 +19,13 @@ module.exports = function () {
   router.use('/partials', partialsRouter);
 
   // Login API request.
-  router.post('/api/login', function (req, res) {
-    Promise.resolve()
-      .then(function () {
-        if (req.body.username && req.body.password)
-          return auth.signIn(req.body.username, req.body.password,
-            !!req.body.permanence);
-      })
-      .then(function (user){
-        if (user)
-          res.status(200).json(user);
-        else
-          res.sendStatus(404);
-      })
-      .catch(function (err){
-        console.log(err);
-        res.sendStatus(404);
-      })
+
+  var authErrOptions = { '401': { bypassInterceptors: true } };
+  var authMW = auth.authMiddleware(null, null, null, null, authErrOptions);
+  router.post('/api/login', authMW, function (req, res) {
+    res.status(200).json(req.user);
   });
+
 
   // Rendering of the common layout. Routing is left to front-end.
   router.get('/*', function (req, res) {
