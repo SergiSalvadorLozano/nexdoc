@@ -164,14 +164,15 @@ module.exports = function (){
 
 
   // Not working.
-  auth.signIn = function (username, password, permanence) {
+  auth.signIn = function (username, password) {
     return new Promise (function (resolve, reject) {
       userCtrl.findOne({username: username, password: password})
         .then(function (user) {
           if (!user)
             return Promise.resolve(null);
-          var newValues = { idToken: comHlp.generateString(100) };
-          newValues.idTokenExpiry = permanence ? null : comHlp.soon(30);
+          var newValues = {
+            idToken: comHlp.generateString(100),
+          };
           return userCtrl.updateOne({id: user.id}, newValues);
         })
         .then(function (user) {

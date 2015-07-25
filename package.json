@@ -3,6 +3,7 @@
   "version": "0.0.2",
   "dependencies": {
     "express": "~4.9.0",
+    "crypto-js": "*",
     "body-parser": "*",
     "bluebird": "*",
     "jade": "*",
