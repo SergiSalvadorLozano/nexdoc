@@ -9,7 +9,8 @@ module.exports = function (){
   var Promise = require('bluebird')
     , cryptoJS = require('crypto-js')
     , userCtrl = require('./user')
-    , comHlp = require('../helpers/common')
+    , commonHlp = require('../helpers/common')
+    , routesHlp = require('../helpers/routes')
     , permCfg = require('../config/permissions');
 
 
@@ -18,14 +19,16 @@ module.exports = function (){
   // Error returned when the credentials sent in the request are invalid.
   var credentialsError = {
     code: 401,
-    data: 'Invalid credentials provided in request.'
+    data: 'Invalid credentials provided in request.',
+    options: {}
   };
 
 
   // Error returned when the credentials sent in the request are invalid.
   var serverError = {
     code: 500,
-    data: 'Server error during authentication.'
+    data: 'Server error during authentication.',
+    options: {}
   };
 
 
@@ -48,7 +51,8 @@ module.exports = function (){
       },
       error: {
         code: 401,
-        data: 'User identity mismatch.'
+        data: 'User identity mismatch.',
+        options: {}
       }
     },
 
@@ -64,7 +68,8 @@ module.exports = function (){
       },
       error: {
         code: 401,
-        data: 'Insufficient permissions for request.'
+        data: 'Insufficient permissions for request.',
+        options: {}
       }
     }
 
@@ -99,11 +104,11 @@ module.exports = function (){
                 .then(function (result) {
                   resolve(result);
                 })
-                .catch(comHlp.rejectPromise(reject));
+                .catch(commonHlp.rejectPromise(reject));
             else
               resolve({verdict: false, resErr: check.error});
           })
-          .catch(comHlp.rejectPromise(reject));
+          .catch(commonHlp.rejectPromise(reject));
       }
     });
   };
@@ -129,10 +134,10 @@ module.exports = function (){
                 .then(function (result) {
                   resolve(result);
                 })
-                .catch(comHlp.rejectPromise(reject));
+                .catch(commonHlp.rejectPromise(reject));
             }
           })
-          .catch(comHlp.rejectPromise(reject));
+          .catch(commonHlp.rejectPromise(reject));
       }
     });
   };
@@ -141,14 +146,19 @@ module.exports = function (){
   // FUNCTIONALITY
 
   //
-  auth.authMiddleware = function (checkLists, emailLoc, signatureLoc, resErr,
-    resOptions){
+  auth.authMiddleware = function (checkLists, emailLoc, onceLoc, signatureLoc,
+    resErr, resOptions){
 
     checkLists = checkLists && checkLists.length > 0 ? checkLists : [[]];
     if (!emailLoc)
       emailLoc = {
         prop: 'headers',
         param: 'nd-auth-email'
+      };
+    if (!onceLoc)
+      onceLoc = {
+        prop: 'headers',
+        param: 'nd-auth-once'
       };
     if (!signatureLoc)
       signatureLoc = {
@@ -160,6 +170,7 @@ module.exports = function (){
 
     return function (req, res, next) {
       var email = req[emailLoc.prop][emailLoc.param]
+        , once = req[onceLoc.prop][onceLoc.param]
         , signature = req[signatureLoc.prop][signatureLoc.param];
       userCtrl.findOne({email: email})
         .then(function (user) {
@@ -168,19 +179,20 @@ module.exports = function (){
             return _resolveCheckLists(req, checkLists, resErr);
           }
           else
-            return Promise.resolve({verdict: false, resErr: credentialsError});
+            routesHlp.sendResponse(credentialsError.code, credentialsError.data,
+              credentialsError.options);
         })
         .then(function (result) {
           if (result.verdict)
             next();
           else
-            res.status(result.resErr.code)
-              .json({data: result.resErr.data, options: resOptions});
+            routesHlp.sendResponse(result.resErr.code, result.resErr.data,
+              result.resErr.options);
         })
         .catch(function (err) {
           console.log(err);
-          res.status(serverError.code)
-            .json({data: serverError.data, options: resOptions});
+          routesHlp.sendResponse(serverError.code, serverError.data,
+            serverError.options);
         });
     };
   };
