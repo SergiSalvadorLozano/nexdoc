@@ -142,7 +142,7 @@ module.exports = function (){
 
   //
   auth.authMiddleware = function (checkLists, emailLoc, signatureLoc, resErr,
-    options){
+    resOptions){
 
     checkLists = checkLists && checkLists.length > 0 ? checkLists : [[]];
     if (!emailLoc)
@@ -156,7 +156,7 @@ module.exports = function (){
         param: 'nd-auth-signature'
       };
     resErr = resErr ? resErr : null;
-    options = options ? options : {};
+    resOptions = resOptions ? resOptions : {};
 
     return function (req, res, next) {
       var email = req[emailLoc.prop][emailLoc.param]
@@ -175,12 +175,12 @@ module.exports = function (){
             next();
           else
             res.status(result.resErr.code)
-              .json({data: result.resErr.data, options: options});
+              .json({data: result.resErr.data, options: resOptions});
         })
         .catch(function (err) {
           console.log(err);
           res.status(serverError.code)
-            .json({data: serverError.data, options: options});
+            .json({data: serverError.data, options: resOptions});
         });
     };
   };
