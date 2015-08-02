@@ -13,15 +13,15 @@ module.exports = function () {
   var permissions = {};
   // Permissions assigned to the role 'user'.
   permissions[roles['user']] = [
-    'viewOwnProfile',
-    'editOwnProfile',
-    'deleteOwnAccount'
+    'AccountDeleteOwn',
+    'ProfileEditOwn',
+    'ProfileViewOwn'
   ];
   // Permissions assigned to the role 'admin'.
   permissions[roles['admin']] = [
-    'viewAllProfiles',
-    'editAllProfiles',
-    'deleteAllAccounts'
+    'AccountDeleteAll',
+    'ProfileEditAll',
+    'ProfileViewAll'
   ];
 
   permCfg.roles = roles;

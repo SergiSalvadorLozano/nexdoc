@@ -1,13 +1,14 @@
 'use strict';
 
 module.exports = function (){
-  var helpers = {};
+  var routesHlp = {};
 
   // FUNCTIONALITY
 
-  helpers.sendResponse = function (res, status, data, options) {
-    res.status(status).json({data: data, options: options});
+  routesHlp.sendResponse = function (res, code, data, options) {
+    res.status(code).json({data: data, options: options});
   };
 
 
-}
+  return routesHlp;
+}();

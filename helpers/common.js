@@ -14,7 +14,7 @@ module.exports = function (){
   };
 
 
-  // Generates an aphanumeric string to be used as ID Token.
+  // Generates a random aphanumeric string.
   helpers.generateString = function (strLength) {
     var str = ''
       , strChars = '0123456789' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
