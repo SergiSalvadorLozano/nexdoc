@@ -9,18 +9,19 @@ module.exports = function (){
     , permCfg = require('../config/permissions');
 
 
+
   var database = {
     User: [
       {
         id: 1,
         email: 'alice@example.com',
-        password: '1234',
+        password: '$2a$10$XqhRW/DiZLby9Q4WKIyup.80elqL1zeJ7sDUOL/PtUaKHqQrgyzfe', // 1234
         role: permCfg.roles['admin']
       },
       {
         id: 2,
         email: 'bob@example.com',
-        password: '4321',
+        password: '$2a$10$bs22jPViS6sVJ1DFmlq/SOOJBvTUOl1IRYGERlEWX2mesnX1Gpola', // 4321
         role: permCfg.roles['user']
       }
     ],
@@ -49,6 +50,18 @@ module.exports = function (){
       resolve(null);
     });
   };
+
+
+	ctrlHlp.createOne = function (modelName, newValues) {
+		return new Promise (function (resolve, reject) {
+			var newModel = {};
+			Object.keys(newValues).forEach(function (column) {
+				newModel[column] = newValues[column];
+			});
+			database[modelName].push(newModel);
+			resolve(newModel);
+		});
+	};
 
 
   ctrlHlp.updateOne = function (model, newValues) {

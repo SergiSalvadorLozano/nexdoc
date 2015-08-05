@@ -5,7 +5,9 @@ module.exports = function (){
   var sessionCtrl = {};
 
   var Promise = require('bluebird')
+		, commonHlp = require('../helpers/common')
     , ctrlHlp = require('../helpers/controllers');
+
 
   sessionCtrl.findOne = function (where, include) {
     return new Promise (function (resolve, reject) {
@@ -21,6 +23,21 @@ module.exports = function (){
         })
     });
   };
+
+	sessionCtrl.createOne = function (user) {
+		var newValues = {
+			id: Math.floor(Math.random() * 1000),
+			id_token: commonHlp.generateString(100),
+			user_id: user.id,
+			expiry_date: commonHlp.soon(30)
+		};
+		return ctrlHlp.createOne('Session', newValues)
+			.then(function (session) {
+				if (session)
+					session.User = user;
+				return Promise.resolve(session);
+			});
+	};
 
   sessionCtrl.updateOne = function (model, newValues) {
     return ctrlHlp.updateOne(model, newValues);

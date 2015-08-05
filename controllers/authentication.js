@@ -8,6 +8,7 @@ module.exports = function (){
 
   var _ = require('underscore')
     , Promise = require('bluebird')
+		, bcrypt = Promise.promisifyAll(require('bcrypt-nodejs'))
     , sessionCtrl = require('./session')
     , userCtrl = require('./user')
     , commonHlp = require('../helpers/common')
@@ -33,7 +34,7 @@ module.exports = function (){
   };
 
 
-  // Error returned when the credentials sent in the request are invalid.
+  // Error returned when an internal error happened during .
   var serverError = {
     code: 500,
     data: { msg: 'Server error during authentication.' },
@@ -54,7 +55,8 @@ module.exports = function (){
           };
         return function (req) {
           return new Promise (function (resolve) {
-            resolve(req.session.User.id === req[userIdLoc.prop][userIdLoc.param]);
+            resolve(req.session.User.id ===
+							req[userIdLoc.prop][userIdLoc.param]);
           });
         };
       },
@@ -88,18 +90,31 @@ module.exports = function (){
 
   // LOCAL HELPERS
 
+	// Generates a new pair hash + salt from a password.
+	var _hashPassword = function (password) {
+		return bcrypt.genSaltAsync(10)
+			.then(function(result) {
+				return bcrypt.hashAsync(password, result, null);
+			})
+	};
+
+
+	//
+	var _validatePassword = function (password, hash) {
+		return bcrypt.compareAsync(password, hash);
+	};
+
+
+
   // Verifies the validity of a given session.
   var _validateSession = function (session) {
-    console.log(session.expiry_date);
-    console.log(new Date());
     return session.expiry_date >= new Date();
   };
 
 
   // Extends the validity period of a given session.
   var _extendSession = function (session) {
-    return sessionCtrl.updateOne({id: session.id},
-      {expiry_date: commonHlp.soon(30)});
+    return sessionCtrl.updateOne(session, {expiry_date: commonHlp.soon(30)});
   };
 
 
@@ -110,7 +125,7 @@ module.exports = function (){
       data: !_.isUndefined(error1.data) ? _.extend(error2.data, error1.data)
         : error2.data,
       options: !_.isUndefined(error1.options) ?
-        _.extend(error2.options, error1.options) : error2.data
+        _.extend(error2.options, error1.options) : error2.options
     };
   };
 
@@ -190,27 +205,52 @@ module.exports = function (){
         .then(function (session) {
           if (session && session.User && _validateSession(session)) {
             req.session = session;
-            return _resolveCheckLists(req, checkLists, resErr);
+            return _resolveCheckLists(req, checkLists);
           }
           else
-            return {verdict: false, resErr: sessionError};
+            return Promise.resolve({verdict: false, resErr: sessionError});
         })
         .then(function (result) {
           if (result.verdict)
             next();
-          else
-            //@TODO merge resErr with result.resErr.
-            routesHlp.sendResponse(res, result.resErr.code, result.resErr.data,
-              result.resErr.options);
+          else {
+						var error = _mergeErrors(resErr, result.resErr);
+						routesHlp.sendResponse(res, error.code, error.data, error.options);
+					}
         })
         .catch(function (err) {
           console.log(err);
-          //@TODO merge resErr with result.resErr.
-          routesHlp.sendResponse(res, serverError.code, serverError.data,
-            serverError.options);
+					var error = _mergeErrors(resErr, serverError);
+					routesHlp.sendResponse(res, error.code, error.data, error.options);
         });
     };
   };
+
+
+	//
+	auth.signIn = function (email, password) {
+		var user;
+		return userCtrl.findOne({email: email})
+			.then(function (userPar) {
+				user = userPar;
+				if (user)
+					return _validatePassword(password, user.password);
+			})
+			.then(function (verdict) {
+				if (verdict)
+					return sessionCtrl.createOne(user);
+			})
+	};
+
+
+
+
+
+
+
+
+
+
 
 
   var next = function () {
@@ -242,6 +282,14 @@ module.exports = function (){
 
   auth.authMiddleware(cls)(req, res, next);
 
+
+	auth.signIn('alice@example.com', '1234')
+		.then(function (val) {
+			console.log(val);
+		})
+		.catch(function (err) {
+			console.log(err);
+		})
 
 
 
