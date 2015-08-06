@@ -99,11 +99,10 @@ module.exports = function (){
 	};
 
 
-	//
+  // Verifies the validity of a given session against a hash + salt pair.
 	var _validatePassword = function (password, hash) {
 		return bcrypt.compareAsync(password, hash);
 	};
-
 
 
   // Verifies the validity of a given session.
@@ -197,13 +196,19 @@ module.exports = function (){
         prop: 'headers',
         param: 'nd-authentication'
       };
-    resErr = resErr ? resErr : null;
+    resErr = resErr ? resErr : {};
 
     return function (req, res, next) {
       var idToken = req[idTokenLoc.prop][idTokenLoc.param];
       sessionCtrl.findOne({id_token: idToken})
         .then(function (session) {
-          if (session && session.User && _validateSession(session)) {
+          if (session && session.User && _validateSession(session))
+            return _extendSession(session);
+          else
+            return Promise.resolve({verdict: false, resErr: sessionError});
+        })
+        .then(function (session) {
+          if (session) {
             req.session = session;
             return _resolveCheckLists(req, checkLists);
           }
@@ -243,17 +248,13 @@ module.exports = function (){
 	};
 
 
+  //
+  auth.signOut = function (sessionId) {
+		return sessionCtrl.deleteOne({id: sessionId});
+	};
 
 
-
-
-
-
-
-
-
-
-  var next = function () {
+  /*var next = function () {
     console.log('PASSED THE TESTS!')
   };
 
@@ -267,33 +268,25 @@ module.exports = function (){
     }
   };
 
-  var req = {
-    headers: {
-      'nd-authentication': '46sad4fasdf6asd5fafas6df'
-    },
-    params: {userId: 2}
-  };
-
   var cls = [
     [{name: 'permission', args: ['ProfileViewOwn']},
       {name: 'identity'}],
     [{name: 'permission', args: ['ProfileViewAll']}]
   ];
 
-  auth.authMiddleware(cls)(req, res, next);
-
-
-	auth.signIn('alice@example.com', '1234')
-		.then(function (val) {
-			console.log(val);
+	auth.signIn('bob@example.com', '4321')
+		.then(function (session) {
+      if (!session)
+        throw new Error('Invalid session!')
+      var req = {
+        headers: {'nd-authentication': session.id_token},
+        params: {userId: 2}
+      };
+      auth.authMiddleware(cls)(req, res, next);
 		})
 		.catch(function (err) {
 			console.log(err);
-		})
-
-
-
-
+		})*/
 
   return auth;
 }();

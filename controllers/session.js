@@ -47,6 +47,10 @@ module.exports = function (){
     return ctrlHlp.updateAll('Session', where, newValues);
   };
 
+  sessionCtrl.deleteOne = function (where) {
+    return ctrlHlp.deleteOne('Session', where);
+  };
+
 
   return sessionCtrl;
 }();

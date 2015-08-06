@@ -95,5 +95,21 @@ module.exports = function (){
   };
 
 
+  ctrlHlp.deleteOne = function (modelName, where) {
+    return new Promise (function (resolve, reject) {
+      for (var i = 0 ; i < database[modelName].length ; i += 1) {
+        var fulfills = true;
+        Object.keys(where).forEach(function (column) {
+          if (database[modelName][i][column] !== where[column])
+            fulfills = false;
+        });
+        if (fulfills)
+          database[modelName].splice(i,1);
+      }
+      resolve(true);
+    });
+  };
+
+
   return ctrlHlp;
 }();
