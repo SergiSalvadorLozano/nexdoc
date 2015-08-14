@@ -13,33 +13,11 @@ module.exports = function (){
     , userCtrl = require('./user')
     , commonHlp = require('../helpers/common')
     , routesHlp = require('../helpers/routes')
-    , permCfg = require('../config/permissions');
+    , permCfg = require('../config/permissions')
+		, errCfg = require('../config/errors');
 
 
   // PRIVATE ATTRIBUTES
-
-  // Error returned when the credentials sent in the request are invalid.
-  var credentialsError = {
-    code: 401,
-    data: { msg: 'Invalid credentials provided in request.' },
-    options: {}
-  };
-
-
-  // Error returned when the idToken sent in the request is invalid.
-  var sessionError = {
-    code: 401,
-    data: { msg: 'Request is using an invalid session.' },
-    options: {}
-  };
-
-
-  // Error returned when an internal error happened during .
-  var serverError = {
-    code: 500,
-    data: { msg: 'Server error during authentication.' },
-    options: {}
-  };
 
 
   // Custom authentication checks
@@ -60,11 +38,7 @@ module.exports = function (){
           });
         };
       },
-      error: {
-        code: 403,
-        data: { msg: 'User identity mismatch.' },
-        options: {}
-      }
+      error: errCfg.identityError
     },
 
     // Verifies that the requesting user has the given permission.
@@ -77,11 +51,7 @@ module.exports = function (){
           });
         };
       },
-      error: {
-        code: 403,
-        data: { msg: 'Insufficient permissions for request.' },
-        options: {}
-      }
+      error: errCfg.permissionsError
     }
 
     // Add more custom checks here.
@@ -200,12 +170,15 @@ module.exports = function (){
 
     return function (req, res, next) {
       var idToken = req[idTokenLoc.prop][idTokenLoc.param];
+			req.session = null;
+
       sessionCtrl.findOne({id_token: idToken})
         .then(function (session) {
           if (session && session.User && _validateSession(session))
             return _extendSession(session);
           else
-            return Promise.resolve({verdict: false, resErr: sessionError});
+            return Promise.resolve({verdict: false,
+							resErr: errCfg.sessionError});
         })
         .then(function (session) {
           if (session) {
@@ -213,20 +186,23 @@ module.exports = function (){
             return _resolveCheckLists(req, checkLists);
           }
           else
-            return Promise.resolve({verdict: false, resErr: sessionError});
+            return Promise.resolve({verdict: false,
+							resErr: errCfg.sessionError});
         })
         .then(function (result) {
           if (result.verdict)
             next();
           else {
 						var error = _mergeErrors(resErr, result.resErr);
-						routesHlp.sendResponse(res, error.code, error.data, error.options);
+						routesHlp.sendResponse(res, error.code, error.data, error.options,
+							req.session);
 					}
         })
         .catch(function (err) {
           console.log(err);
-					var error = _mergeErrors(resErr, serverError);
-					routesHlp.sendResponse(res, error.code, error.data, error.options);
+					var error = _mergeErrors(resErr, errCfg.serverError);
+					routesHlp.sendResponse(res, error.code, error.data, error.options,
+						req.session);
         });
     };
   };
