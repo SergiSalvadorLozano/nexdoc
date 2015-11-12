@@ -3,24 +3,25 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
   head
     title Nexdoc
     meta(charset='utf8')
-    
+
     // Stylesheets.
     link(rel='stylesheet', href='/css/common.css')
-    
+
     // External js modules.
     script(src='components/angular/angular.js')
+    script(src='components/angular-cookies/angular-cookies.js')
     script(src='components/angular-route/angular-route.js')
-    
+
     // Angular app.
     script(src='/js/app.js')
-    
+
     // Angular routing.
     script(src='/js/routes/main.js')
-    
+
     // Angular controllers.
     script(src='/js/controllers/global.js')
-    
-    
+
+
 
   body
     header

@@ -1,36 +1,35 @@
 'use strict';
 
-module.exports = function () {
 
-  // DEPENDENCIES
+// DEPENDENCIES
 
-  var express = require('express')
-    , Promise = require('bluebird')
-    , auth = require('../controllers/authentication')
+var express = require('express')
+  , Promise = require('bluebird')
+  , auth = require('../controllers/authentication')
 
   // Subrouters.
-    , partialsRouter = require('./partials')
-		, accountRouter = require('./account');
+  , partialsRouter = require('./partials')
+  , accountRouter = require('./account')
+  ;
 
 
-	var router = express.Router({mergeParams: true});
+var router = express.Router({mergeParams: true});
 
 
-  // ROUTES
+// ROUTES
 
-  // Rendering of partial views.
-  router.use('/partials', partialsRouter);
+// Rendering of partial views.
+router.use('/partials', partialsRouter);
 
-	// Account API requests.
-	router.use('/api/account', accountRouter);
-
-
-
-  // Rendering of the common layout. Routing is left to front-end.
-  router.get('/*', function (req, res) {
-    res.render('common');
-  });
+// Account API requests.
+router.use('/api/account', accountRouter);
 
 
-  return router;
-};
+// Rendering of the common layout. Other view routing is delegated to
+// client-side code.
+router.get('/*', function (req, res) {
+  res.render('common');
+});
+
+
+module.exports = router;

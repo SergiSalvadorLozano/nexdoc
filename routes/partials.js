@@ -1,20 +1,20 @@
 'use strict';
 
-module.exports = function () {
-  var router = express.Router({mergeParams: true});
 
-  // DEPENDENCIES
+// DEPENDENCIES
 
-  var express = require('express')
-    , auth = require('../controllers/authentication')
+var express = require('express')
+  , auth = require('../controllers/authentication')
+  ;
+
+var router = express.Router({mergeParams: true});
 
 
-  // ROUTES
+// ROUTES
 
-  // Home partials.
-  router.get('/home/index', function (req, res){
-    res.render('partials/home/index');
-  });
+// Home partials.
+router.get('/home/index', function (req, res) {
+  res.render('partials/home/index');
+});
 
-  return router;
-};
+module.exports = router;

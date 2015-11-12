@@ -7,7 +7,7 @@ var express = require('express')
   , auth = require('./controllers/authentication')
   , router = require('./routes/main');
 
-var port = 8000;
+var port = 3000;
 
 var app = express();
 

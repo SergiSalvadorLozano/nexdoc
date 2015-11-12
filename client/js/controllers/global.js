@@ -12,7 +12,7 @@
       $rootScope.langCode = 'en';
       $rootScope.isLoggedIn = false;
       $scope.loginForm = {
-        username: '',
+        email: '',
         password: ''
       };
     };
@@ -23,13 +23,13 @@
 
     // Attempts to sign in with the information in the login form.
     $scope.signIn = function () {
-      $http.post('/api/login', {
-        username: $scope.loginForm.username,
+      $http.post('/api/account/signIn', {
+        email: $scope.loginForm.email,
         password: $scope.loginForm.password
       })
         .success(function (res) {
           $rootScope.user = {
-            username: $scope.loginForm.username,
+            username: $scope.loginForm.email,
             password: $scope.loginForm.password
           };
           $rootScope.isLoggedIn = true;
