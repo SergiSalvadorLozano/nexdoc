@@ -22,7 +22,7 @@ routesHlp.addRoutes = function (router, routes) {
   _.keys(routes).forEach(function (method) {
     routes[method].forEach(function (route) {
       var behaviour = function (req, res) {
-        route.fn(req, res)
+        route.behaviour(req, res)
           .catch(function (err) {
             console.log(err);
             var resErr = errCfg[err.name] || errCfg.serverError;

@@ -89,30 +89,41 @@ var _resolveCheckList = function (req, checkList) {
 };
 
 
-// Resolves a list of checklists.
+// Resolves a list of checklists. For each of them, if it has the 'flag'
+// property, a boolean is written in 'req.flags' under that name with the
+// verdict. If it also has the 'softFlag' property, only true verdicts
+// write/overwrite the flag on 'req.flags'.
 // Returned promise resolves to an object {verdict: boolean, errName: string}.
-// - verdict is true if at least one checklist has a true verdict.
-// - errName equals firstErrName, or if undefined, the error name produced by
-// the first checklist to fail. It is always undefined for true verdicts.
-var _resolveCheckLists = function (req, checkLists, firstErrName) {
+// - verdict is true if none of the checklists has a false verdict.
+// - errName is the name of the error produced by the first checklist to fail.
+// It is always undefined for true verdicts.
+
+//@todo: change softFlag behaviour so it can be used for true or false.
+var _resolveCheckLists = function (req, checkLists) {
   return new Promise(function (resolve, reject) {
-    if (checkLists.length === 0)
-      resolve({verdict: false, errName: firstErrName});
-    else {
-      _resolveCheckList(req, checkLists[0])
-        .then(function (result) {
-          if (result.verdict)
-            resolve(result);
-          else {
-            var errName = firstErrName || result.errName;
-            return _resolveCheckLists(req, checkLists.slice(1), errName);
+    req.flags = req.flags || {};
+    Promise.all(_.map(checkLists, function (cl) {
+      return _resolveCheckList(req, cl.list);
+    }))
+      .then(function (results) {
+        var finalResult = {verdict: false};
+        results.forEach(function (result, index) {
+          if (result.verdict) {
+            if (checkLists[index].flag) {
+              req.flags[checkLists[index].flag] = true;
+            }
+            finalResult.verdict = true;
           }
-        })
-        .then(function (result) {
-          resolve(result);
-        })
-        .catch(commonHlp.rejectPromise(reject));
-    }
+          else if (!finalResult.errName) {
+            if (checkLists[index].flag && !checkLists[index].softFlag) {
+              req.flags[checkLists[index].flag] = false;
+            }
+            finalResult.errName = result.errName;
+          }
+        });
+        resolve(finalResult);
+      })
+      .catch(commonHlp.rejectPromise(reject));
   });
 };
 
@@ -120,11 +131,12 @@ var _resolveCheckLists = function (req, checkLists, firstErrName) {
 // FUNCTIONALITY
 
 //
-auth.authMiddleware = function (checkLists, idTokenLoc, baseErrName) {
-  checkLists = checkLists && checkLists.length > 0 ? checkLists : [[]];
+auth.middleware = function (checkLists, optCheckLists, idTokenLoc,
+                            baseErrName) {
+
   idTokenLoc = idTokenLoc || {
       prop: 'headers',
-      param: 'nd-authentication'
+      param: 'authentication'
     };
 
   return function (req, res, next) {
@@ -143,7 +155,8 @@ auth.authMiddleware = function (checkLists, idTokenLoc, baseErrName) {
       .then(function (session) {
         if (session) {
           req.session = session;
-          return _resolveCheckLists(req, checkLists);
+          return (checkLists && checkLists.length > 0) ?
+            _resolveCheckLists(req, checkLists) : {verdict: true};
         }
         else {
           throw _.extend(new Error(), {name: 'sessionError'});
@@ -151,11 +164,15 @@ auth.authMiddleware = function (checkLists, idTokenLoc, baseErrName) {
       })
       .then(function (result) {
         if (result.verdict) {
-          next();
+          return (optCheckLists && optCheckLists.length > 0) ?
+            _resolveCheckLists(req, optCheckLists) : null;
         }
         else {
           throw _.extend(new Error(), {name: result.errName});
         }
+      })
+      .then(function () {
+        next();
       })
       .catch(function (err) {
         console.log(err);
@@ -204,11 +221,13 @@ auth.signOut = function (sessionId) {
 //  }
 //};
 //
-//var cls = [
-//  [{name: 'permission', args: ['ProfileViewOwn']},
-//    {name: 'identity'}],
-//  [{name: 'permission', args: ['ProfileViewAll']}]
-//];
+//var cls = [{
+//  list: [{name: 'permission', args: ['ProfileViewOwn']}, {name: 'identity'}],
+//  flag: 'identity',
+//  softFlag: true
+//}, {
+//  list: [{name: 'permission', args: ['ProfileViewAll']}],
+//}];
 //
 //auth.signIn('bob@example.com', '4321')
 //  .then(function (session) {
@@ -216,13 +235,13 @@ auth.signOut = function (sessionId) {
 //      throw new Error('Invalid session!');
 //    var req = {
 //      headers: {'nd-authentication': session.id_token},
-//      params: {userId: '2'}
+//      params: {userId: '1'}
 //    };
-//    auth.authMiddleware(cls)(req, res, next);
+//    auth.middleware(cls)(req, res, next);
 //  })
 //  .catch(function (err) {
 //    console.log(err);
 //  });
 
-return auth;
+module.exports = auth;
 

@@ -1,49 +1,51 @@
 'use strict';
 
-(function () {
 
-  angular.module('nexdocApp').controller('GlobalController',
-    function ($scope, $rootScope, $http, $window) {
+angular.module('nexdocApp').controller('GlobalController',
+  function ($scope, $rootScope, $http, $window) {
 
-    // INITIALISATION
+    // HELPERS
 
-    $scope.init = function () {
-      $rootScope.user = {};
-      $rootScope.langCode = 'en';
-      $rootScope.isLoggedIn = false;
+    var _resetForms = function () {
       $scope.loginForm = {
         email: '',
         password: ''
       };
     };
 
-    $scope.init();
+    var _init = function () {
+      $rootScope.session = null;
+      $rootScope.user = null;
+      $rootScope.langCode = 'en';
+      _resetForms();
+    };
+
 
     // FUNCTIONALITY
 
     // Attempts to sign in with the information in the login form.
     $scope.signIn = function () {
+      //console.log('a');
       $http.post('/api/account/signIn', {
         email: $scope.loginForm.email,
         password: $scope.loginForm.password
       })
         .success(function (res) {
-          $rootScope.user = {
-            username: $scope.loginForm.email,
-            password: $scope.loginForm.password
-          };
-          $rootScope.isLoggedIn = true;
+          // Redirect wherever.
         })
-        .error(function (err) {
-          $scope.init();
-          console.log(err);
-        })
+        .finally(function () {
+          _resetForms();
+        });
     };
 
     // Signs out the current user.
     $scope.signOut = function () {
-      $window.location.reload();
+      $http.post('/api/account/signOut', {});
     };
-  });
 
-})();
+
+    // ACTIONS
+
+    _init();
+
+  });

@@ -9,6 +9,11 @@ module.exports = function (){
 
 
 
+
+  userCtrl.createOne = function (values) {
+
+  };
+
   userCtrl.findOne = function (where, include) {
     return ctrlHlp.findOne('User', where, include);
   };

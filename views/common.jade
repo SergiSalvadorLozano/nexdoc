@@ -26,12 +26,12 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
   body
     header
       h1 Nexdoc
-      .userArea(ng-if='isLoggedIn')
-        p {{user.username}}
+      .userArea(ng-if='$root.user')
+        p {{$root.user.email}}
         input(type='button', value='Sign out', ng-click='signOut()')
-      .loginArea(ng-if='!isLoggedIn')
+      .loginArea(ng-if='!$root.user')
         form(ng-submit='signIn()')
-          input(type='text', placeholder='username', ng-model='loginForm.username')
+          input(type='text', placeholder='email', ng-model='loginForm.email')
           input(type='password', placeholder='password', ng-model='loginForm.password')
           input(type='submit', value='Sign in')
     div(ng-view)

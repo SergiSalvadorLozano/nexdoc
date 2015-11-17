@@ -23,15 +23,10 @@ var routes = {
     // Sign In.
     {
       url: '/signIn',
-
       mw: [],
-
-      fn: function (req, res) {
+      behaviour: function (req, res) {
         var email = req.body.email
           , password = req.body.password;
-
-        console.log(email);
-        console.log(password);
 
         return auth.signIn(email, password)
           .then(function (session) {
@@ -43,11 +38,22 @@ var routes = {
             }
           });
       }
+    },
+
+    // Sign Out.
+    {
+      url: '/signOut',
+      mw: [auth.middleware()],
+      behaviour: function (req, res) {
+        return auth.signOut(req.session.id)
+          .then(function () {
+              routesHlp.sendResponse(res, 200, null, null, null);
+          });
+      }
     }
 
   ]
 };
-
 
 
 routesHlp.addRoutes(router, routes);

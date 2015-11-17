@@ -30,6 +30,7 @@ module.exports = function (){
         id: 1,
         id_token: '46sad4fasdf6asd5fafas6df',
         user_id: 1,
+        lang_code: 'en',
         expiry_date: commonHlp.soon(30)
       }
     ]

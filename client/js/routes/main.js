@@ -1,54 +1,57 @@
 'use strict';
 
-(function () {
 
-  angular.module('nexdocApp').config(function ($routeProvider, $httpProvider) {
+angular.module('nexdocApp').config(function ($routeProvider, $httpProvider) {
 
-    // INTERCEPTORS
+  // INTERCEPTORS
 
-    $httpProvider.interceptors.push(function ($rootScope, $location, $q,
-      $cookies) {
-
-      return {
-        // For every outgoing request.
-        request: function (req) {
-          // Attach headers.
-          //req.headers['session-id'] = $rootScope.sessionId;
-          req.headers['auth-username'] = $rootScope.user.username;
-          req.headers['auth-password'] = $rootScope.user.password;
-          req.headers['lang-code'] = $rootScope.langCode;
-
-          // Refresh session cookie for 1 hour.
-          //if ($cookies.get('permanentSession') !== 'true')
-          //$cookies.
-
-          return req;
-        },
-
-        // For every response with an error code.
-        responseError: function (res) {
-          // Handle errors.
-          if (res.status === 401)
-            $location.path('/').search('');
-          return $q.reject(res);
+  // Attach headers to every outgoing request.
+  $httpProvider.interceptors.push(function ($rootScope) {
+    return {
+      request: function (req) {
+        // Attach headers.
+        if ($rootScope.session) {
+          req.headers['authentication'] = $rootScope.session.id_token;
         }
+        return req;
       }
-    });
-
-    // ROUTING
-
-    $routeProvider
-      // Home routes.
-      .when ('/home', {
-        redirectTo: '/home/index'
-      })
-      .when ('/home/index', {
-        templateUrl: 'partials/home/index'
-      })
-      // Other routes.
-      .otherwise ({
-        redirectTo: '/home'
-      });
+    }
   });
 
-})();
+  // Refresh session (and related global variables) on every response.
+  $httpProvider.interceptors.push(function ($rootScope, $q) {
+    var _refreshSession = function (session) {
+      $rootScope.session = session;
+      $rootScope.user = session ? session.User : null;
+      $rootScope.langCode = session ? session.langCode : 'en';
+    };
+
+    return {
+      response: function (res) {
+        _refreshSession(res.data.session);
+        return res;
+      },
+      responseError: function (res) {
+        _refreshSession(res.data.session);
+        return $q.reject(res);
+      }
+    }
+  });
+
+
+  // ROUTING
+
+  $routeProvider
+    // Home routes.
+    .when('/home', {
+      redirectTo: '/home/index'
+    })
+    .when('/home/index', {
+      templateUrl: 'partials/home/index'
+    })
+    // Other routes.
+    .otherwise({
+      redirectTo: '/home'
+    });
+});
+
