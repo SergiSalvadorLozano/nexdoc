@@ -9,6 +9,12 @@ var Promise = require('bluebird')
   , ctrlHlp = require('../helpers/controllers');
 
 
+sessionCtrl.ID_TOKEN_LENGTH = 175; // Digits in base 64.
+sessionCtrl.REFRESH_TOKEN_LENGTH = 350; // Digits in base 64.
+sessionCtrl.ID_TOKEN_VALIDITY = 0.5; // Hours.
+sessionCtrl.REFRESH_TOKEN_VALIDITY = 24; // Hours.
+
+
 sessionCtrl.findOne = function (where, include) {
   return new Promise(function (resolve) {
     var session;
@@ -26,13 +32,17 @@ sessionCtrl.findOne = function (where, include) {
   });
 };
 
-sessionCtrl.createOne = function (user) {
+sessionCtrl.createOne = function (user, remember) {
   var newValues = {
     id: Math.floor(Math.random() * 1000),
-    id_token: commonHlp.generateString(100),
+    id_token: commonHlp.generateString(sessionCtrl.ID_TOKEN_LENGTH),
+    refresh_token: commonHlp.generateString(sessionCtrl.REFRESH_TOKEN_LENGTH),
     user_id: user.id,
     lang_code: 'en',
-    expiry_date: commonHlp.soon(30)
+    expiry_date: remember ? null
+      : commonHlp.later(sessionCtrl.ID_TOKEN_VALIDITY),
+    refresh_expiry_date: remember ? null
+      : commonHlp.later(sessionCtrl.REFRESH_TOKEN_VALIDITY)
   };
   return ctrlHlp.createOne('Session', newValues)
     .then(function (session) {

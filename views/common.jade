@@ -17,6 +17,7 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
 
     // Angular routing.
     script(src='/js/routes/main.js')
+    script(src='/js/routes/main-interceptors.js')
 
     // Angular controllers.
     script(src='/js/controllers/global.js')
@@ -34,4 +35,5 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
           input(type='text', placeholder='email', ng-model='loginForm.email')
           input(type='password', placeholder='password', ng-model='loginForm.password')
           input(type='submit', value='Sign in')
+          input(type='checkbox', ng-model='loginForm.remember')
     div(ng-view)

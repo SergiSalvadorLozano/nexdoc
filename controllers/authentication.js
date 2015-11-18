@@ -29,34 +29,49 @@ var _hashPassword = function (password) {
 };
 
 
-// Verifies the validity of a given session against a hash + salt pair.
+// Verifies the validity of a given password against a hash + salt pair.
 var _validatePassword = function (password, hash) {
   return bcrypt.compareAsync(password, hash);
 };
 
 
 // Verifies the validity of a given session.
-var _validateSession = function (session) {
-  return session.expiry_date >= new Date();
+var _validateSession = function (session, refresh) {
+  if (refresh) {
+    return !session.refresh_expiry_date ||
+      session.refresh_expiry_date >= new Date()
+  }
+  else {
+    return !session.expiry_date || session.expiry_date >= new Date()
+  }
 };
 
 
 // Extends the validity period of a given session.
-var _extendSession = function (session) {
-  return sessionCtrl.updateOne(session, {expiry_date: commonHlp.soon(30)});
+var _extendSession = function (session, refresh) {
+  var newValues = {
+    refresh_expiry_date: commonHlp.later(sessionCtrl.REFRESH_TOKEN_VALIDITY)
+  };
+  if (refresh) {
+    newValues.id_token = commonHlp.generateString(sessionCtrl.ID_TOKEN_LENGTH);
+    newValues.expiry_date = commonHlp.later(sessionCtrl.ID_TOKEN_VALIDITY);
+  }
+  return sessionCtrl.updateOne(session, newValues);
 };
 
 
-// Merges two error objects through Union. First objects takes precedence.
+// Merges two error objects through Union. First object takes precedence.
 var _mergeErrors = function (error1, error2) {
   error1 = error1 || {};
   error2 = error2 || {};
+
   return {
-    code: !_.isUndefined(error1.code) ? error1.code : error2.code,
-    data: !_.isUndefined(error1.data) ? _.extend(error2.data, error1.data)
-      : error2.data,
-    options: !_.isUndefined(error1.options) ?
-      _.extend(error2.options, error1.options) : error2.options
+    code: error1.code || error2.code,
+    data: error1.data && error2.data ? _.extend(error2.data, error1.data)
+      : (error1.data ? error1.data : (error2.data ? error2.data : null)),
+    options: error1.options && error2.options ?
+      _.extend(error2.options, error1.options) : (error1.options ?
+      error1.options : (error2.options ? error2.options : null))
   };
 };
 
@@ -131,7 +146,7 @@ var _resolveCheckLists = function (req, checkLists) {
 // FUNCTIONALITY
 
 //
-auth.middleware = function (checkLists, optCheckLists, idTokenLoc,
+auth.middleware = function (checkLists, optCheckLists, idTokenLoc, rfTokenLoc,
                             baseErrName) {
 
   idTokenLoc = idTokenLoc || {
@@ -139,14 +154,24 @@ auth.middleware = function (checkLists, optCheckLists, idTokenLoc,
       param: 'authentication'
     };
 
+  rfTokenLoc = rfTokenLoc || {
+      prop: 'headers',
+      param: 'authentication-refresh'
+    };
+
   return function (req, res, next) {
-    var idToken = req[idTokenLoc.prop][idTokenLoc.param];
+    var idToken = req[idTokenLoc.prop][idTokenLoc.param] || null
+      , rfToken = req[rfTokenLoc.prop][rfTokenLoc.param] || null
+      , refresh = !!rfToken
+      ;
+
     req.session = null;
 
-    sessionCtrl.findOne({id_token: idToken})
+    sessionCtrl.findOne(refresh ? {refresh_token: rfToken} :
+    {id_token: idToken})
       .then(function (session) {
-        if (session && session.User && _validateSession(session)) {
-          return _extendSession(session);
+        if (session && session.User && _validateSession(session, refresh)) {
+          return _extendSession(session, refresh);
         }
         else {
           throw _.extend(new Error(), {name: 'sessionError'});
@@ -186,17 +211,17 @@ auth.middleware = function (checkLists, optCheckLists, idTokenLoc,
 
 
 //
-auth.signIn = function (email, password) {
+auth.signIn = function (email, password, remember) {
   var user;
   return userCtrl.findOne({email: email})
-    .then(function (userPar) {
-      user = userPar;
+    .then(function (userParam) {
+      user = userParam;
       if (user)
         return _validatePassword(password, user.password);
     })
     .then(function (verdict) {
       if (verdict)
-        return sessionCtrl.createOne(user);
+        return sessionCtrl.createOne(user, remember);
     })
 };
 

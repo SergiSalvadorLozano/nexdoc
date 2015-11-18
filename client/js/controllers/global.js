@@ -2,21 +2,23 @@
 
 
 angular.module('nexdocApp').controller('GlobalController',
-  function ($scope, $rootScope, $http, $window) {
+  function ($scope, $rootScope, $http, $cookies) {
 
     // HELPERS
 
     var _resetForms = function () {
       $scope.loginForm = {
         email: '',
-        password: ''
+        password: '',
+        remember: false
       };
     };
 
     var _init = function () {
-      $rootScope.session = null;
-      $rootScope.user = null;
-      $rootScope.langCode = 'en';
+      var session = $cookies.session ? JSON.parse($cookies.session) : null;
+      $rootScope.session = session;
+      $rootScope.user = session ? session.User : null;
+      $rootScope.langCode = session ? session.langCode : 'en';
       _resetForms();
     };
 
@@ -25,11 +27,7 @@ angular.module('nexdocApp').controller('GlobalController',
 
     // Attempts to sign in with the information in the login form.
     $scope.signIn = function () {
-      //console.log('a');
-      $http.post('/api/account/signIn', {
-        email: $scope.loginForm.email,
-        password: $scope.loginForm.password
-      })
+      $http.post('/api/account/signIn', $scope.loginForm)
         .success(function (res) {
           // Redirect wherever.
         })

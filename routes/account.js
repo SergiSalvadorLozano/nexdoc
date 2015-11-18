@@ -25,10 +25,12 @@ var routes = {
       url: '/signIn',
       mw: [],
       behaviour: function (req, res) {
-        var email = req.body.email
-          , password = req.body.password;
+        var email = req.body.email || null
+          , password = req.body.password || null
+          , remember = !!req.body.remember
+          ;
 
-        return auth.signIn(email, password)
+        return auth.signIn(email, password, remember)
           .then(function (session) {
             if (session) {
               routesHlp.sendResponse(res, 200, null, null, session);

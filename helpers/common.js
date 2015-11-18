@@ -26,7 +26,7 @@ commonHlp.generateString = function (strLength) {
   var str = ''
     , randHexNums
     , validChars = '0123456789' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-      'abcdefghijklmnopqrstuvwxyz';
+      'abcdefghijklmnopqrstuvwxyz' + '-_'; // Base 64
 
   strLength = strLength || 100;
   randHexNums = crypto.randomBytes(strLength * 4).toString('hex');
@@ -38,10 +38,10 @@ commonHlp.generateString = function (strLength) {
 };
 
 
-// Returns the current date plus a given amount of minutes (30 by default).
-commonHlp.soon = function (plusMinutes) {
-  plusMinutes = typeof plusMinutes === 'number' ? plusMinutes : 30;
-  return new Date(Date.now() + plusMinutes * 60000);
+// Returns the current date plus a given amount of hours (1 by default).
+commonHlp.later = function (plusHours) {
+  plusHours = plusHours || 1;
+  return new Date(Date.now() + plusHours * 3600000);
 };
 
 

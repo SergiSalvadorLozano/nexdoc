@@ -29,9 +29,11 @@ module.exports = function (){
       {
         id: 1,
         id_token: '46sad4fasdf6asd5fafas6df',
+        refresh_token: 'asdfadsfa4asdf4asdf4asdf4adsf4a4sdf4a4dsf4asf4',
         user_id: 1,
         lang_code: 'en',
-        expiry_date: commonHlp.soon(30)
+        expiry_date: commonHlp.later(0.5),
+        refresh_expiry_date: commonHlp.later(24)
       }
     ]
   };
