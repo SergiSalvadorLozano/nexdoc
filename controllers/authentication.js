@@ -89,14 +89,16 @@ var _resolveCheckList = function (req, checkList) {
       var check = authChecks[checkList[0].name];
       check.method.apply(null, checkList[0].args)(req)
         .then(function (verdict) {
-          if (verdict)
+          if (verdict) {
             _resolveCheckList(req, checkList.slice(1))
               .then(function (result) {
                 resolve(result);
               })
               .catch(commonHlp.rejectPromise(reject));
-          else
+          }
+          else {
             resolve({verdict: false, errName: check.error});
+          }
         })
         .catch(commonHlp.rejectPromise(reject));
     }
@@ -116,23 +118,20 @@ var _resolveCheckList = function (req, checkList) {
 //@todo: change softFlag behaviour so it can be used for true or false.
 var _resolveCheckLists = function (req, checkLists) {
   return new Promise(function (resolve, reject) {
-    req.flags = req.flags || {};
     Promise.all(_.map(checkLists, function (cl) {
       return _resolveCheckList(req, cl.list);
     }))
       .then(function (results) {
         var finalResult = {verdict: false};
         results.forEach(function (result, index) {
+          if (checkLists[index].flag &&
+            checkLists[index].softFlag !== !result.verdict) {
+            req.flags[checkLists[index].flag] = result.verdict;
+          }
           if (result.verdict) {
-            if (checkLists[index].flag) {
-              req.flags[checkLists[index].flag] = true;
-            }
             finalResult.verdict = true;
           }
           else if (!finalResult.errName) {
-            if (checkLists[index].flag && !checkLists[index].softFlag) {
-              req.flags[checkLists[index].flag] = false;
-            }
             finalResult.errName = result.errName;
           }
         });
@@ -146,10 +145,10 @@ var _resolveCheckLists = function (req, checkLists) {
 // FUNCTIONALITY
 
 //
-auth.middleware = function (checkLists, optCheckLists, idTokenLoc, rfTokenLoc,
+auth.middleware = function (checkLists, optCheckLists, acTokenLoc, rfTokenLoc,
                             baseErrName) {
 
-  idTokenLoc = idTokenLoc || {
+  acTokenLoc = acTokenLoc || {
       prop: 'headers',
       param: 'authentication'
     };
@@ -160,18 +159,20 @@ auth.middleware = function (checkLists, optCheckLists, idTokenLoc, rfTokenLoc,
     };
 
   return function (req, res, next) {
-    var idToken = req[idTokenLoc.prop][idTokenLoc.param] || null
+    var acToken = req[acTokenLoc.prop][acTokenLoc.param] || null
       , rfToken = req[rfTokenLoc.prop][rfTokenLoc.param] || null
       , refresh = !!rfToken
       ;
 
     req.session = null;
+    req.flags = {sessionRefresh: refresh};
 
     sessionCtrl.findOne(refresh ? {refresh_token: rfToken} :
-    {id_token: idToken})
+    {access_token: acToken})
       .then(function (session) {
-        if (session && session.User && _validateSession(session, refresh)) {
-          return _extendSession(session, refresh);
+        if (session && session.User &&
+          sessionCtrl.validateSession(session, refresh)) {
+          return sessionCtrl.extendSession(session, refresh);
         }
         else {
           throw _.extend(new Error(), {name: 'sessionError'});
@@ -203,8 +204,10 @@ auth.middleware = function (checkLists, optCheckLists, idTokenLoc, rfTokenLoc,
         console.log(err);
         var error = _mergeErrors(errCfg[baseErrName], errCfg[err.name] ||
           errCfg.serverError);
+
         routesHlp.sendResponse(res, error.code, error.data, error.options,
-          req.session);
+          req.session ? sessionCtrl.filter(req.session,
+            {refresh: req.flags.sessionRefresh}) : null);
       })
   };
 };
@@ -227,8 +230,8 @@ auth.signIn = function (email, password, remember) {
 
 
 //
-auth.signOut = function (sessionId) {
-  return sessionCtrl.deleteOne({id: sessionId});
+auth.signOut = function (rfToken) {
+  return sessionCtrl.deleteOne({refresh_token: rfToken});
 };
 
 
@@ -259,8 +262,8 @@ auth.signOut = function (sessionId) {
 //    if (!session)
 //      throw new Error('Invalid session!');
 //    var req = {
-//      headers: {'nd-authentication': session.id_token},
-//      params: {userId: '1'}
+//      headers: {'authentication-refresh': session.refresh_token},
+//      params: {userId: '2'}
 //    };
 //    auth.middleware(cls)(req, res, next);
 //  })

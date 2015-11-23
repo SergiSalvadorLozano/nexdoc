@@ -6,6 +6,7 @@
 var _ = require('underscore')
   , express = require('express')
   , auth = require('../controllers/authentication')
+  , sessionCtrl = require('../controllers/session')
   , routesHlp = require('../helpers/routes')
   ;
 
@@ -33,7 +34,8 @@ var routes = {
         return auth.signIn(email, password, remember)
           .then(function (session) {
             if (session) {
-              routesHlp.sendResponse(res, 200, null, null, session);
+              routesHlp.sendResponse(res, 200, null, null,
+                sessionCtrl.filter(session, {firstResponse: true}));
             }
             else {
               throw _.extend(new Error(), {name: 'credentialsError'});
@@ -47,7 +49,7 @@ var routes = {
       url: '/signOut',
       mw: [auth.middleware()],
       behaviour: function (req, res) {
-        return auth.signOut(req.session.id)
+        return auth.signOut(req.session.refresh_token)
           .then(function () {
               routesHlp.sendResponse(res, 200, null, null, null);
           });

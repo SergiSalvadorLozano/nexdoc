@@ -26,7 +26,7 @@ commonHlp.generateString = function (strLength) {
   var str = ''
     , randHexNums
     , validChars = '0123456789' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-      'abcdefghijklmnopqrstuvwxyz' + '-_'; // Base 64
+      'abcdefghijklmnopqrstuvwxyz' + '-_'; // 64 possible digits.
 
   strLength = strLength || 100;
   randHexNums = crypto.randomBytes(strLength * 4).toString('hex');

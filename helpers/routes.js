@@ -5,6 +5,7 @@
 
 var _ = require('underscore')
   , errCfg = require('../config/errors')
+  , sessionCtrl = require('../controllers/session')
   ;
 
 
@@ -25,9 +26,13 @@ routesHlp.addRoutes = function (router, routes) {
         route.behaviour(req, res)
           .catch(function (err) {
             console.log(err);
-            var resErr = errCfg[err.name] || errCfg.serverError;
+            console.log(req.session);
+            var resErr = errCfg[err.name] || errCfg.serverError
+              , session = !req.session ? req.session : sessionCtrl.filter(
+                req.session, {refresh: req.flags.sessionRefresh})
+              ;
             routesHlp.sendResponse(res, resErr.code, resErr.data,
-              resErr.options, null);
+              resErr.options, session);
           })
       };
 

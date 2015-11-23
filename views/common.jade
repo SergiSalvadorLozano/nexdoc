@@ -8,6 +8,7 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
     link(rel='stylesheet', href='/css/common.css')
 
     // External js modules.
+    script(src='components/underscore/underscore.js')
     script(src='components/angular/angular.js')
     script(src='components/angular-cookies/angular-cookies.js')
     script(src='components/angular-route/angular-route.js')
@@ -28,7 +29,7 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
     header
       h1 Nexdoc
       .userArea(ng-if='$root.user')
-        p {{$root.user.email}}
+        p {{$root.user.name}}
         input(type='button', value='Sign out', ng-click='signOut()')
       .loginArea(ng-if='!$root.user')
         form(ng-submit='signIn()')

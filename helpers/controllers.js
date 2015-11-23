@@ -16,18 +16,19 @@ module.exports = function (){
         id: 1,
         email: 'alice@example.com',
         password: '$2a$10$XqhRW/DiZLby9Q4WKIyup.80elqL1zeJ7sDUOL/PtUaKHqQrgyzfe', // 1234
+        name: 'Alice',
         role: permCfg.roles['admin']
       },
       {
         id: 2,
         email: 'bob@example.com',
         password: '$2a$10$bs22jPViS6sVJ1DFmlq/SOOJBvTUOl1IRYGERlEWX2mesnX1Gpola', // 4321
+        name: 'Bob',
         role: permCfg.roles['user']
       }
     ],
     Session: [
       {
-        id: 1,
         id_token: '46sad4fasdf6asd5fafas6df',
         refresh_token: 'asdfadsfa4asdf4asdf4asdf4adsf4a4sdf4a4dsf4asf4',
         user_id: 1,

@@ -8,6 +8,7 @@
     "bluebird": "*",
     "bcrypt-nodejs": "*",
     "jade": "*",
+    "mysql": "*",
     "sequelize": "*"
   }
 }
