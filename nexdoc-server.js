@@ -3,9 +3,9 @@
 var express = require('express')
   , bodyParser = require('body-parser')
   , path = require('path')
-  // , models = require('./models')
-  , auth = require('./controllers/authentication')
-  , router = require('./routes/main');
+  , models = require('./models')
+  , router = require('./routes/main')
+  ;
 
 var port = 3000;
 
@@ -27,6 +27,8 @@ app.set('view engine', 'jade');
 // Routes.
 app.use('/', router);
 
-var server = app.listen(port, function () {
-  console.log('Express server listening on port ' + port);
+models.sequelize.sync().then(function () {
+  var server = app.listen(port, function () {
+    console.log('Express server listening on port ' + port);
+  });
 });

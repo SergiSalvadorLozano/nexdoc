@@ -7,15 +7,15 @@ angular.module('nexdocApp').config(function ($httpProvider) {
   $httpProvider.interceptors.push(function ($rootScope) {
     return {
       request: function (req) {
-        if ($rootScope.session && (!$rootScope.session.refresh_expiry_date ||
-          new Date($rootScope.session.refresh_expiry_date) > new Date())) {
-          if (!$rootScope.session.access_expiry_date ||
-            new Date($rootScope.session.access_expiry_date) > new Date()) {
-            req.headers['authentication'] = $rootScope.session.access_token;
+        if ($rootScope.session && (!$rootScope.session.refreshExpiryDate ||
+          new Date($rootScope.session.refreshExpiryDate) > new Date())) {
+          if (!$rootScope.session.accessExpiryDate ||
+            new Date($rootScope.session.accessExpiryDate) > new Date()) {
+            req.headers['authentication'] = $rootScope.session.accessToken;
           }
           else {
             req.headers['authentication-refresh'] =
-              $rootScope.session.refresh_token;
+              $rootScope.session.refreshToken;
           }
         }
         return req;
@@ -28,22 +28,22 @@ angular.module('nexdocApp').config(function ($httpProvider) {
     var _ = $window._;
     var _refreshSession = function (newSession) {
       var session = $cookies.session ? JSON.parse($cookies.session) : {};
-      if (newSession && (!session.refresh_expiry_date ||
-        new Date(newSession.refresh_expiry_date) >
-        new Date(session.refresh_expiry_date))) {
+      if (newSession && (!session.refreshExpiryDate ||
+        new Date(newSession.refreshExpiryDate) >
+        new Date(session.refreshExpiryDate))) {
         // Refresh session.
         _.extend(session, newSession);
         $cookies.session = JSON.stringify(session);
         $rootScope.session = session;
         $rootScope.user = session.User;
-        $rootScope.langCode = session.lang_code;
+        $rootScope.languageCode = session.languageCode;
       }
       else if (newSession === null) {
         // Delete session.
         delete $cookies.session;
         $rootScope.session = null;
         $rootScope.user = null;
-        $rootScope.langCode = null;
+        $rootScope.languageCode = null;
       }
     };
 

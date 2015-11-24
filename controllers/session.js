@@ -7,6 +7,7 @@ var sessionCtrl = {};
 var _ = require('underscore')
   , Promise = require('bluebird')
   , userCtrl = require('./user')
+  , constants = require('../config/constants')
   , commonHlp = require('../helpers/common')
   , ctrlHlp = require('../helpers/controllers')
   ;
@@ -14,22 +15,22 @@ var _ = require('underscore')
 
 // CONSTANTS
 
-const ACCESS_TOKEN_LENGTH = 175; // Digits in base 64.
-const REFRESH_TOKEN_LENGTH = 350; // Digits in base 64.
-const ACCESS_TOKEN_VALIDITY = 0.5; // Hours.
-const REFRESH_TOKEN_VALIDITY = 24; // Hours.
+//const ACCESS_TOKEN_LENGTH = 175; // Digits in base 64.
+//const REFRESH_TOKEN_LENGTH = 350; // Digits in base 64.
+//const ACCESS_TOKEN_VALIDITY = 0.5; // Hours.
+//const REFRESH_TOKEN_VALIDITY = 24; // Hours.
 
 
 // FUNCTIONALITY
 
 // Filters a session object so it will only contain values for certain keys.
 sessionCtrl.filterOutput = function (sessionValues, flags) {
-  var whiteList = ['User', 'lang_code', 'refresh_expiry_date'];
+  var whiteList = ['User', 'languageCode', 'refreshExpiryDate'];
   if (flags.firstResponse) {
-    whiteList.push('refresh_token');
+    whiteList.push('refreshToken');
   }
   if (flags.firstResponse || flags.refresh) {
-    whiteList = whiteList.concat(['access_expiry_date', 'access_token']);
+    whiteList = whiteList.concat(['accessExpiryDate', 'accessToken']);
   }
   sessionValues.User = userCtrl.filterOutput(sessionValues.User, {session: true});
   return _.pick(sessionValues, whiteList);
@@ -39,12 +40,12 @@ sessionCtrl.filterOutput = function (sessionValues, flags) {
 // Verifies the validity of a given session.
 sessionCtrl.validateSession = function (session, refresh) {
   if (refresh) {
-    return !session.refresh_expiry_date ||
-      session.refresh_expiry_date >= new Date()
+    return !session.refreshExpiryDate ||
+      session.refreshExpiryDate >= new Date()
   }
   else {
-    return !session.access_expiry_date ||
-      session.access_expiry_date >= new Date()
+    return !session.accessExpiryDate ||
+      session.accessExpiryDate >= new Date()
   }
 };
 
@@ -52,11 +53,13 @@ sessionCtrl.validateSession = function (session, refresh) {
 // Extends the validity period of a given session.
 sessionCtrl.extendSession = function (session, refresh) {
   var newValues = {
-    refresh_expiry_date: commonHlp.later(REFRESH_TOKEN_VALIDITY)
+    refreshExpiryDate: commonHlp.later(constants.REFRESH_TOKEN_VALIDITY)
   };
   if (refresh) {
-    newValues.access_token = commonHlp.generateString(ACCESS_TOKEN_LENGTH);
-    newValues.access_expiry_date = commonHlp.later(ACCESS_TOKEN_VALIDITY);
+    newValues.accessToken =
+      commonHlp.generateString(constants.ACCESS_TOKEN_LENGTH);
+    newValues.accessExpiryDate =
+      commonHlp.later(constants.ACCESS_TOKEN_VALIDITY);
   }
   return sessionCtrl.updateOne(session, newValues);
 };
@@ -68,7 +71,7 @@ sessionCtrl.findOne = function (where, include) {
     ctrlHlp.findOne('Session', where, include)
       .then(function (sessionPar) {
         session = sessionPar;
-        return session ? ctrlHlp.findOne('User', {id: session.user_id})
+        return session ? ctrlHlp.findOne('User', {id: session.userId})
           : null;
       })
       .then(function (userPar) {
@@ -82,13 +85,13 @@ sessionCtrl.findOne = function (where, include) {
 
 sessionCtrl.createOne = function (user, remember) {
   var newValues = {
-    refresh_token: commonHlp.generateString(REFRESH_TOKEN_LENGTH),
-    access_token: commonHlp.generateString(ACCESS_TOKEN_LENGTH),
-    user_id: user.id,
-    lang_code: 'en',
-    refresh_expiry_date: remember ? null
-      : commonHlp.later(REFRESH_TOKEN_VALIDITY),
-    access_expiry_date: commonHlp.later(ACCESS_TOKEN_VALIDITY)
+    refreshToken: commonHlp.generateString(constants.REFRESH_TOKEN_LENGTH),
+    accessToken: commonHlp.generateString(constants.ACCESS_TOKEN_LENGTH),
+    userId: user.id,
+    languageCode: 'en',
+    refreshExpiryDate: remember ? null
+      : commonHlp.later(constants.REFRESH_TOKEN_VALIDITY),
+    accessExpiryDate: commonHlp.later(constants.ACCESS_TOKEN_VALIDITY)
   };
   return ctrlHlp.createOne('Session', newValues)
     .then(function (session) {

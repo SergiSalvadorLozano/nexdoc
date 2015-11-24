@@ -18,7 +18,7 @@ angular.module('nexdocApp').controller('GlobalController',
       var session = $cookies.session ? JSON.parse($cookies.session) : null;
       $rootScope.session = session;
       $rootScope.user = session ? session.User : null;
-      $rootScope.langCode = session ? session.langCode : 'en';
+      $rootScope.languageCode = session ? session.languageCode : 'en';
       _resetForms();
     };
 

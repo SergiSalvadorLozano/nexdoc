@@ -35,7 +35,7 @@ var routes = {
           .then(function (session) {
             if (session) {
               routesHlp.sendResponse(res, 200, null, null,
-                sessionCtrl.filter(session, {firstResponse: true}));
+                sessionCtrl.filterOutput(session, {firstResponse: true}));
             }
             else {
               throw _.extend(new Error(), {name: 'credentialsError'});

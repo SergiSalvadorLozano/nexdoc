@@ -35,31 +35,6 @@ var _validatePassword = function (password, hash) {
 };
 
 
-// Verifies the validity of a given session.
-var _validateSession = function (session, refresh) {
-  if (refresh) {
-    return !session.refresh_expiry_date ||
-      session.refresh_expiry_date >= new Date()
-  }
-  else {
-    return !session.expiry_date || session.expiry_date >= new Date()
-  }
-};
-
-
-// Extends the validity period of a given session.
-var _extendSession = function (session, refresh) {
-  var newValues = {
-    refresh_expiry_date: commonHlp.later(sessionCtrl.REFRESH_TOKEN_VALIDITY)
-  };
-  if (refresh) {
-    newValues.id_token = commonHlp.generateString(sessionCtrl.ID_TOKEN_LENGTH);
-    newValues.expiry_date = commonHlp.later(sessionCtrl.ID_TOKEN_VALIDITY);
-  }
-  return sessionCtrl.updateOne(session, newValues);
-};
-
-
 // Merges two error objects through Union. First object takes precedence.
 var _mergeErrors = function (error1, error2) {
   error1 = error1 || {};
@@ -167,8 +142,8 @@ auth.middleware = function (checkLists, optCheckLists, acTokenLoc, rfTokenLoc,
     req.session = null;
     req.flags = {sessionRefresh: refresh};
 
-    sessionCtrl.findOne(refresh ? {refresh_token: rfToken} :
-    {access_token: acToken})
+    sessionCtrl.findOne(refresh ? {refreshToken: rfToken} :
+    {accessToken: acToken})
       .then(function (session) {
         if (session && session.User &&
           sessionCtrl.validateSession(session, refresh)) {
@@ -262,7 +237,7 @@ auth.signOut = function (rfToken) {
 //    if (!session)
 //      throw new Error('Invalid session!');
 //    var req = {
-//      headers: {'authentication-refresh': session.refresh_token},
+//      headers: {'authentication-refresh': session.refreshToken},
 //      params: {userId: '2'}
 //    };
 //    auth.middleware(cls)(req, res, next);
