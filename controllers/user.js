@@ -12,8 +12,8 @@ var _ = require('underscore')
 
 // FUNCTIONALITY
 
-// Filters a user object so it will only contain values for certain keys.
-userCtrl.filter = function (userValues, flags) {
+// Filters a user output object so it will only contain values for certain keys.
+userCtrl.filterOutput = function (userValues, flags) {
   var whiteList = ['id', 'name'];
   if (flags.session) {
     whiteList = whiteList.concat(['role']);

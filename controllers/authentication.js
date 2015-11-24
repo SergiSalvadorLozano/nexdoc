@@ -206,7 +206,7 @@ auth.middleware = function (checkLists, optCheckLists, acTokenLoc, rfTokenLoc,
           errCfg.serverError);
 
         routesHlp.sendResponse(res, error.code, error.data, error.options,
-          req.session ? sessionCtrl.filter(req.session,
+          req.session ? sessionCtrl.filterOutput(req.session,
             {refresh: req.flags.sessionRefresh}) : null);
       })
   };

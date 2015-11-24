@@ -12,7 +12,7 @@ var errCfg = {
 
   // The credentials sent in a sign-in request are invalid.
   credentialsError: {
-    code: 401,
+    code: 403,
     data: {msg: 'Invalid credentials provided in request.'},
     options: {}
   },

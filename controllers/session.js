@@ -23,7 +23,7 @@ const REFRESH_TOKEN_VALIDITY = 24; // Hours.
 // FUNCTIONALITY
 
 // Filters a session object so it will only contain values for certain keys.
-sessionCtrl.filter = function (sessionValues, flags) {
+sessionCtrl.filterOutput = function (sessionValues, flags) {
   var whiteList = ['User', 'lang_code', 'refresh_expiry_date'];
   if (flags.firstResponse) {
     whiteList.push('refresh_token');
@@ -31,7 +31,7 @@ sessionCtrl.filter = function (sessionValues, flags) {
   if (flags.firstResponse || flags.refresh) {
     whiteList = whiteList.concat(['access_expiry_date', 'access_token']);
   }
-  sessionValues.User = userCtrl.filter(sessionValues.User, {session: true});
+  sessionValues.User = userCtrl.filterOutput(sessionValues.User, {session: true});
   return _.pick(sessionValues, whiteList);
 };
 
