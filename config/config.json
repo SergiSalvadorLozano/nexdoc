@@ -5,7 +5,8 @@
     "database": "nexdoc_development",
     "host": "127.0.0.1",
     "port": "3306",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
   },
   "test": {
     "username": "nexdoc",
@@ -13,7 +14,8 @@
     "database": "nexdoc_test",
     "host": "127.0.0.1",
     "port": "3306",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
   },
   "production": {
     "username": "nexdoc",
@@ -21,6 +23,7 @@
     "database": "nexdoc_production",
     "host": "127.0.0.1",
     "port": "3306",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "logging": false
   }
 }

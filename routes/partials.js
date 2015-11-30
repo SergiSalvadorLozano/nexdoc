@@ -17,4 +17,14 @@ router.get('/home/index', function (req, res) {
   res.render('partials/home/index');
 });
 
+
+// Account partials
+router.get('/account/signIn', function (req, res) {
+  res.render('partials/account/signIn');
+});
+
+router.get('/account/signUp', function (req, res) {
+  res.render('partials/account/signUp');
+});
+
 module.exports = router;

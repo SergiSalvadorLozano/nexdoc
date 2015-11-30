@@ -24,7 +24,14 @@ var errCfg = {
     options: {}
   },
 
-  // User's identity doesn't correspond with the one expected.
+  // Request failed to provide one or more of the required input values.
+  requiredInputError: {
+    code: 403,
+    data: {msg: 'Request is missing one or more required input values.'},
+    options: {}
+  },
+
+  // Requesting user's identity doesn't correspond with the one expected.
   identityError: {
     code: 403,
     data: {msg: 'User identity mismatch.'},

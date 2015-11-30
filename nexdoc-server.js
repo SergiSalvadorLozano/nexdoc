@@ -27,7 +27,8 @@ app.set('view engine', 'jade');
 // Routes.
 app.use('/', router);
 
-models.sequelize.sync().then(function () {
+
+models.sequelize.sync({logging: false}).then(function () {
   var server = app.listen(port, function () {
     console.log('Express server listening on port ' + port);
   });

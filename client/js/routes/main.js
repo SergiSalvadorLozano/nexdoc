@@ -1,7 +1,8 @@
 'use strict';
 
 
-angular.module('nexdocApp').config(function ($routeProvider) {
+angular.module('nexdocApp').config(function ($routeProvider,
+                                             $locationProvider) {
 
   $routeProvider
     // Home routes.
@@ -11,9 +12,18 @@ angular.module('nexdocApp').config(function ($routeProvider) {
     .when('/home/index', {
       templateUrl: 'partials/home/index'
     })
+
+    // Account routes.
+    .when('/signUp', {
+      templateUrl: 'partials/account/signUp',
+      controller: 'SignUpController'
+    })
+
     // Other routes.
     .otherwise({
       redirectTo: '/home'
     });
+
+  $locationProvider.html5Mode(true);
 });
 

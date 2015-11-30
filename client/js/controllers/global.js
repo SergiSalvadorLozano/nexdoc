@@ -2,7 +2,7 @@
 
 
 angular.module('nexdocApp').controller('GlobalController',
-  function ($scope, $rootScope, $http, $cookies) {
+  function ($scope, $rootScope, $http, $cookies, $location) {
 
     // HELPERS
 
@@ -19,26 +19,17 @@ angular.module('nexdocApp').controller('GlobalController',
       $rootScope.session = session;
       $rootScope.user = session ? session.User : null;
       $rootScope.languageCode = session ? session.languageCode : 'en';
-      _resetForms();
     };
 
 
     // FUNCTIONALITY
 
-    // Attempts to sign in with the information in the login form.
-    $scope.signIn = function () {
-      $http.post('/api/account/signIn', $scope.loginForm)
-        .success(function (res) {
-          // Redirect wherever.
-        })
-        .finally(function () {
-          _resetForms();
-        });
-    };
-
     // Signs out the current user.
     $scope.signOut = function () {
-      $http.post('/api/account/signOut', {});
+      $http.delete('/api/account/signOut')
+        .finally(function () {
+          $location.url('/');
+        });
     };
 
 

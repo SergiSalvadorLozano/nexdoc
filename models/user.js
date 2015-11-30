@@ -1,7 +1,9 @@
 "use strict";
 
 
-var constants = require('../config/constants.json');
+var constants = require('../config/constants.json')
+  , permCfg = require('../config/permissions')
+  ;
 
 module.exports = function (sequelize, DataTypes) {
   var User = sequelize.define("User", {
@@ -23,9 +25,15 @@ module.exports = function (sequelize, DataTypes) {
       type: DataTypes.STRING(constants.USER_NAME_MAX_LENGTH),
       allowNull: false
     },
+    languageCode: {
+      type: DataTypes.STRING(constants.LANGUAGE_CODE_MAX_LENGTH),
+      allowNull: false,
+      defaultValue: constants.LANGUAGE_CODE_DEFAULT
+    },
     role: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      defaultValue: permCfg.roles['user']
     }
   }, {
     //tableName: 'User',

@@ -14,6 +14,7 @@ var _ = require('underscore')
   , userCtrl = require('./user')
   , commonHlp = require('../helpers/common')
   , routesHlp = require('../helpers/routes')
+  , constants = require('../config/constants')
   , errCfg = require('../config/errors')
   ;
 
@@ -22,7 +23,7 @@ var _ = require('underscore')
 
 // Generates a new pair hash + salt from a password.
 var _hashPassword = function (password) {
-  return bcrypt.genSaltAsync(10)
+  return bcrypt.genSaltAsync(constants.BCRYPT_ITERATION_NUMBER)
     .then(function (result) {
       return bcrypt.hashAsync(password, result, null);
     })
@@ -90,7 +91,7 @@ var _resolveCheckList = function (req, checkList) {
 // - errName is the name of the error produced by the first checklist to fail.
 // It is always undefined for true verdicts.
 
-//@todo: change softFlag behaviour so it can be used for true or false.
+//@todo: update softFlag description in the comment above.
 var _resolveCheckLists = function (req, checkLists) {
   return new Promise(function (resolve, reject) {
     Promise.all(_.map(checkLists, function (cl) {
@@ -190,23 +191,36 @@ auth.middleware = function (checkLists, optCheckLists, acTokenLoc, rfTokenLoc,
 
 //
 auth.signIn = function (email, password, remember) {
-  var user;
+  var _user;
   return userCtrl.findOne({email: email})
-    .then(function (userParam) {
-      user = userParam;
+    .then(function (user) {
+      _user = user;
       if (user)
         return _validatePassword(password, user.password);
     })
     .then(function (verdict) {
       if (verdict)
-        return sessionCtrl.createOne(user, remember);
+        return sessionCtrl.createOne(_user, remember);
     })
 };
 
 
 //
 auth.signOut = function (rfToken) {
-  return sessionCtrl.deleteOne({refresh_token: rfToken});
+  return sessionCtrl.delete({refreshToken: rfToken});
+};
+
+
+//
+auth.signUp = function (values) {
+  return _hashPassword(values.password)
+    .then(function (password) {
+      values.password = password;
+      return userCtrl.createOne(values)
+    })
+    .then(function (user) {
+      return sessionCtrl.createOne(user);
+    });
 };
 
 
