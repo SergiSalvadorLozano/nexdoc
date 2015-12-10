@@ -2,34 +2,45 @@
 
 
 angular.module('nexdocApp').controller('GlobalController',
-  function ($scope, $rootScope, $http, $cookies, $location) {
+  function ($scope, $rootScope, $cookies, $location, $window, $translate,
+            Utils) {
+
+    _ = $window._;
 
     // HELPERS
-
-    var _resetForms = function () {
-      $scope.loginForm = {
-        email: '',
-        password: '',
-        remember: false
-      };
-    };
 
     var _init = function () {
       var session = $cookies.session ? JSON.parse($cookies.session) : null;
       $rootScope.session = session;
       $rootScope.user = session ? session.User : null;
-      $rootScope.languageCode = session ? session.languageCode : 'en';
+
+      $scope.languages = Utils.siteLanguages;
     };
+
+
+    // EVENTS AND WATCHERS
+
+    $rootScope.$on('$routeChangeSuccess', function () {
+      var queryString = $location.search()
+        , curLangCode = $rootScope.language ? $rootScope.language.code : null
+        ;
+
+      // Set site language.
+      $rootScope.language =
+        Utils.siteLanguages[queryString.lang || curLangCode || 'en'];
+      $translate.use($rootScope.language.code);
+      $location.search('lang', $rootScope.language.code);
+    });
 
 
     // FUNCTIONALITY
 
-    // Signs out the current user.
-    $scope.signOut = function () {
-      $http.delete('/api/account/signOut')
-        .finally(function () {
-          $location.url('/');
-        });
+    $rootScope.buildLink = function (path, search) {
+      return path + '?' +
+        _.map(_.extend(_.clone($location.search()), search || {}),
+          function (value, key) {
+            return key + '=' + value;
+          }).join('&');
     };
 
 

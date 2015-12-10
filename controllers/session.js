@@ -90,8 +90,7 @@ sessionCtrl.findOne = function (where, flags, fullInstance) {
 
 sessionCtrl.createOne = function (user, remember, fullInstance) {
   var values = {
-    userId: user.id,
-    languageCode: user.languageCode
+    userId: user.id
   };
   if (remember) {
     values.refreshExpiryDate = null;

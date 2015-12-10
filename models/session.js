@@ -31,10 +31,6 @@ module.exports = function (sequelize, DataTypes) {
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false
-    },
-    languageCode: {
-      type: DataTypes.STRING(constants.LANGUAGE_CODE_MAX_LENGTH),
-      allowNull: false
     }
   }, {
     //tableName: 'Session',

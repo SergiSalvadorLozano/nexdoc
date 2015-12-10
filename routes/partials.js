@@ -19,8 +19,8 @@ router.get('/home/index', function (req, res) {
 
 
 // Account partials
-router.get('/account/signIn', function (req, res) {
-  res.render('partials/account/signIn');
+router.get('/account/signInOut', function (req, res) {
+  res.render('partials/account/signInOut');
 });
 
 router.get('/account/signUp', function (req, res) {

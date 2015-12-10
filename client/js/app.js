@@ -1,7 +1,3 @@
 'use strict';
 
-(function () {
-
-  angular.module('nexdocApp', ['ngRoute', 'ngCookies']);
-
-})();
+angular.module('nexdocApp', ['ngRoute', 'ngCookies', 'pascalprecht.translate']);

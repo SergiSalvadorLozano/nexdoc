@@ -1,7 +1,7 @@
 'use strict';
 
 
-angular.module('nexdocApp').controller('SignInController',
+angular.module('nexdocApp').controller('SignInOutController',
   function ($scope, $rootScope, $http, $location) {
 
     // HELPERS
@@ -28,10 +28,19 @@ angular.module('nexdocApp').controller('SignInController',
     $scope.signIn = function () {
       $http.post('/api/account/signIn', $scope.signInForm)
         .success(function () {
-          $location.url('/');
+          $location.path('/');
         })
         .finally(function () {
           _resetForm();
+        });
+    };
+
+
+    // Signs out the current user.
+    $scope.signOut = function () {
+      $http.delete('/api/account/signOut')
+        .finally(function () {
+          $location.path('/');
         });
     };
 

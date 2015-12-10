@@ -36,14 +36,12 @@ angular.module('nexdocApp').config(function ($httpProvider) {
         $cookies.session = JSON.stringify(session);
         $rootScope.session = session;
         $rootScope.user = session.User;
-        $rootScope.languageCode = session.languageCode;
       }
       else if (newSession === null) {
         // Delete session.
         delete $cookies.session;
         $rootScope.session = null;
         $rootScope.user = null;
-        $rootScope.languageCode = null;
       }
     };
 

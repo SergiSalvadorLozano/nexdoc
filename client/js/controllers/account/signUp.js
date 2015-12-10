@@ -28,7 +28,7 @@ angular.module('nexdocApp').controller('SignUpController',
     $scope.signUp = function () {
       $http.post('/api/account/signUp', {user: $scope.signUpForm})
         .success(function () {
-          $location.url('/');
+          $location.path('/');
         })
         .finally(function () {
           _resetForm();

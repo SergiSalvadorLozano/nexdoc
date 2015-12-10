@@ -8,36 +8,50 @@ html(ng-app='nexdocApp', ng-controller='GlobalController as globalCtrl')
     // Stylesheets.
     link(rel='stylesheet', href='/css/common.css')
 
-    // External js modules.
+    // External modules.
     script(src='components/underscore/underscore.js')
     script(src='components/angular/angular.js')
     script(src='components/angular-cookies/angular-cookies.js')
     script(src='components/angular-route/angular-route.js')
+    script(src='components/angular-translate/angular-translate.js')
 
     // Angular app.
     script(src='/js/app.js')
+
+    // Angular configuration.
+    script(src='/js/config/common.js')
 
     // Angular routing.
     script(src='/js/routes/main.js')
     script(src='/js/routes/main-interceptors.js')
 
+    // Angular services.
+    script(src='/js/services/utils.js')
+
     // Angular controllers.
     script(src='/js/controllers/global.js')
-    script(src='/js/controllers/account/signIn.js')
+    script(src='/js/controllers/account/signInOut.js')
     script(src='/js/controllers/account/signUp.js')
 
     // Angular directives.
-    script(src='/js/directives/account/signIn.js')
+    script(src='/js/directives/account/signInOut.js')
 
-
+    // Translations
+    script(src='/js/translations/en.js')
+    script(src='/js/translations/es.js')
+    script(src='/js/translations/cat.js')
+    script(src='/js/translations/fr.js')
+    script(src='/js/translations/de.js')
 
 
   body
     header
-      h1 Nexdoc
-      .userArea(ng-if='$root.user')
-        p {{$root.user.name}}
-        input(type='button', value='Sign out', ng-click='signOut()')
-      .loginArea(ng-if='!$root.user')
-        nd-sign-in
+      a(href='{{$root.buildLink("/")}}')
+        h1 Nexdoc
+      p(ng-if='$root.user') {{$root.user.name}}
+      .userArea
+        select
+          option(ng-repeat='language in languages', value='language.code') {{language.name | translate}}
+        nd-sign-in-out
+
     div(ng-view)
