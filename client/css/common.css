@@ -1,3 +1,79 @@
+/*
+PRIMARY
+default: #3F51B5
+hue-1: #E8EAF6
+hue-2: #1A237E
+
+ACCENT
+default: #80D8FF
+
+BACKGROUND
+default: #FFFFFF
+
+TEXT: black
+*/
+
+
 h1 {
-  color: blue;
+  color: #3F51B5; /*Primary*/
+}
+
+
+div.md-primary {
+  background-color: #3F51B5; /*Primary*/
+}
+
+div.md-hue-1 {
+  background-color: #E8EAF6; /*Primary hue-1*/
+}
+
+div.md-hue-2 {
+  background-color: #1A237E; /*Primary hue-2*/
+}
+
+div.md-accent {
+  background-color: #80D8FF; /*Accent*/
+}
+
+div.md-background {
+  background-color: #FFFFFF; /*Background*/
+}
+
+div.bullet-point {
+  border-radius: 50%;
+  height: 8px;
+  width: 8px;
+  margin: 0 20px 0 0;
+  color: black; /*Text*/
+}
+
+.md-button.round-small {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.md-button.round-small ng-md-icon {
+  fill: #3F51B5; /*Primary*/
+  position: absolute;
+  left: 8px;
+  top: 8px;
+}
+
+.md-button.round-small.md-primary ng-md-icon {
+  fill: #FFFFFF; /*Background*/
+}
+
+md-dialog {
+  width: 600px;
+  height: 600px;
+  padding: 40px;
+}
+
+md-dialog h1 {
+  text-align: center;
+  color: #3F51B5; /*Primary*/
+  font-size: large;
 }

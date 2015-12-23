@@ -10,10 +10,21 @@ angular.module('nexdocApp')
   })
 
   // PROVIDERS CONFIGURATION
-  .config(function ($translateProvider, Config) {
+  .config(function ($translateProvider, $mdThemingProvider, Config) {
 
     // ANGULAR TRANSLATE
     $translateProvider.preferredLanguage(Config.DEFAULT_LANGUAGE);
     $translateProvider.useSanitizeValueStrategy(Config.SANITIZE_VALUE_STRATEGY);
+
+    // ANGULAR MATERIAL
+    $mdThemingProvider.theme('default')
+    .primaryPalette('indigo', {
+      'default': '500',
+      'hue-1': '50',
+      'hue-2': '800'
+    })
+    .accentPalette('light-blue', {
+      'default': 'A100'
+    })
 
   });

@@ -27,19 +27,19 @@ angular.module('nexdocApp').config(function ($httpProvider) {
   $httpProvider.interceptors.push(function ($rootScope, $cookies, $q, $window) {
     var _ = $window._;
     var _refreshSession = function (newSession) {
-      var session = $cookies.session ? JSON.parse($cookies.session) : {};
+      var session = $cookies.getObject('session') || {};
       if (newSession && (!session.refreshExpiryDate ||
         new Date(newSession.refreshExpiryDate) >
         new Date(session.refreshExpiryDate))) {
         // Refresh session.
         _.extend(session, newSession);
-        $cookies.session = JSON.stringify(session);
+        $cookies.putObject('session', session);
         $rootScope.session = session;
         $rootScope.user = session.User;
       }
       else if (newSession === null) {
         // Delete session.
-        delete $cookies.session;
+        $cookies.remove('session');
         $rootScope.session = null;
         $rootScope.user = null;
       }

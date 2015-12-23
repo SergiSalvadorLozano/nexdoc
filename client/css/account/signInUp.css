@@ -1,0 +1,33 @@
+.sign-in-up {
+  border-radius: 20px;
+  width: 300px;
+  padding: 20px;
+}
+
+.sign-in-up md-input-container{
+  margin: 0;
+}
+
+.sign-in-up .full-row {
+  width: 100%;
+}
+
+.sign-in-up .half-row {
+  width: 45%;
+}
+
+.sign-in-up md-divider {
+  margin: 30px 0;
+}
+
+.sign-in-up .md-button.sign-in {
+  width: 100px;
+}
+
+.sign-in-up .md-button.sign-up {
+  width: 160px;
+}
+
+.termsDialog md-list-item {
+  margin: 10px 0 0 0;
+}

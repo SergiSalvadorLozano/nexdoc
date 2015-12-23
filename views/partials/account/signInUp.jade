@@ -1,0 +1,55 @@
+.sign-in-up.md-hue-1(layout='column', layout-align='center')
+
+  // Sign-in form.
+  form(ng-if='!showSignUp', ng-submit='signIn()', layout='column',
+  layout-align='center')
+    md-input-container.full-row
+      label {{'USER_EMAIL' | translate}}
+      input(type='text', ng-model='signInForm.email')
+    md-input-container.full-row
+      label {{'USER_PASSWORD' | translate}}
+      input(type='password', ng-model='signInForm.password')
+    .full-row(layout='row', layout-align='space-between center')
+      md-button.md-raised.round-small(ng-click='toggleRemember()',
+      ng-class='signInForm.remember ? "md-primary" : ""')
+        ng-md-icon(icon='bookmark_outline')
+        md-tooltip(md-direction='bottom'
+        ) {{'ACCOUNT_REMEMBER' | translate | uppercase}}
+      md-button.sign-in.md-raised.md-primary(type='submit',
+      ng-disabled='!signInEnabled()') {{'ACCOUNT_SIGN_IN' | translate}}
+
+  // Sign-up form.
+  form(ng-if='showSignUp', ng-submit='signUp()', layout='column',
+  layout-align='space-around center')
+    md-input-container.full-row
+      label {{'USER_NAME' | translate}}
+      input(type='text', ng-model='signUpForm.name')
+    md-input-container.full-row
+      label {{'USER_EMAIL' | translate}}
+      input(type='text', ng-model='signUpForm.email')
+    md-input-container.full-row
+      label {{'USER_EMAIL_REPEAT' | translate}}
+      input(type='text', ng-model='signUpForm.emailRepeat')
+    md-input-container.full-row
+      label {{'USER_PASSWORD' | translate}}
+      input(type='password', ng-model='signUpForm.password')
+    md-input-container.full-row
+      label {{'USER_PASSWORD_REPEAT' | translate}}
+      input(type='password', ng-model='signUpForm.passwordRepeat')
+    .full-row(layout='row', layout-align='space-between center')
+      md-button.md-raised.round-small(ng-click='showTerms($event)',
+      ng-class='signUpForm.acceptTerms ? "md-primary" : ""')
+        ng-md-icon(icon='assignment')
+        md-tooltip(md-direction='bottom'
+        ) {{'ACCOUNT_TERMS' | translate | uppercase}}
+      //md-checkbox.half-row(ng-model='signUpForm.remember')
+      md-button.sign-up.md-raised.md-primary(type='submit',
+      ng-disabled='!signUpEnabled()') {{'ACCOUNT_SIGN_UP' | translate}}
+
+  md-divider
+
+  // Switch between forms.
+  md-button.switchFormButton.sign-in-button(type='button',
+  ng-click='switchForm()'
+  ) {{(showSignUp ? 'ACCOUNT_SIGN_IN' : 'ACCOUNT_SIGN_UP') | translate}}
+

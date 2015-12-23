@@ -216,7 +216,7 @@ auth.signUp = function (values) {
   return _hashPassword(values.password)
     .then(function (password) {
       values.password = password;
-      return userCtrl.createOne(values)
+      return userCtrl.createOne(values);
     })
     .then(function (user) {
       return sessionCtrl.createOne(user);

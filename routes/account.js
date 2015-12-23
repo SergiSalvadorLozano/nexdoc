@@ -26,11 +26,9 @@ var routes = {
       url: '/signUp',
       mw: [],
       behaviour: function (req, res) {
-        var values = req.body.user || {};
-
         return Promise.resolve()
           .then(function () {
-            return auth.signUp(userCtrl.filterInput(values, {add: true}));
+            return auth.signUp(userCtrl.filterInput(req.body, {add: true}));
           })
           .then(function (session) {
             if (session) {

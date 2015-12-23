@@ -1,8 +1,8 @@
 'use strict';
 
 
-angular.module('nexdocApp').controller('GlobalController',
-  function ($scope, $rootScope, $cookies, $location, $window, $translate,
+angular.module('nexdocApp').controller('CommonController',
+  function ($scope, $rootScope, $cookies, $location, $window, $translate, $http,
             Utils) {
 
     _ = $window._;
@@ -10,10 +10,9 @@ angular.module('nexdocApp').controller('GlobalController',
     // HELPERS
 
     var _init = function () {
-      var session = $cookies.session ? JSON.parse($cookies.session) : null;
+      var session = $cookies.getObject('session');
       $rootScope.session = session;
       $rootScope.user = session ? session.User : null;
-
       $scope.languages = Utils.siteLanguages;
     };
 
@@ -33,14 +32,27 @@ angular.module('nexdocApp').controller('GlobalController',
     });
 
 
+    $scope.onLanguageSelected = function () {
+      $location.search('lang', $rootScope.language.code);
+    };
+
+
     // FUNCTIONALITY
 
-    $rootScope.buildLink = function (path, search) {
-      return path + '?' +
-        _.map(_.extend(_.clone($location.search()), search || {}),
+    $rootScope.buildQuery = function (newPairs) {
+      return '?' + _.map(_.extend(_.clone($location.search()), newPairs || {}),
           function (value, key) {
             return key + '=' + value;
           }).join('&');
+    };
+
+
+    // Signs out the current user.
+    $scope.signOut = function () {
+      $http.delete('/api/account/signOut')
+        .finally(function () {
+          $location.path('/');
+        });
     };
 
 

@@ -12,19 +12,16 @@ var router = express.Router({mergeParams: true});
 
 // ROUTES
 
+// Account partials.
+router.get('/account/:name', function (req, res) {
+  res.render('partials/account/' + req.params.name);
+});
+
+
 // Home partials.
-router.get('/home/index', function (req, res) {
-  res.render('partials/home/index');
+router.get('/home/:name', function (req, res) {
+  res.render('partials/home/' + req.params.name);
 });
 
-
-// Account partials
-router.get('/account/signInOut', function (req, res) {
-  res.render('partials/account/signInOut');
-});
-
-router.get('/account/signUp', function (req, res) {
-  res.render('partials/account/signUp');
-});
 
 module.exports = router;

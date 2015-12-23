@@ -29,7 +29,7 @@ userCtrl.filterInput = function (values, flags) {
     ;
 
   if (flags.add) {
-    required = _.union(required, ['email', 'name', 'password']);
+    required = _.union(required, ['name', 'email', 'password']);
   }
   if (flags.edit) {
     optional = _.union(optional, ['name']);

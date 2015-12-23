@@ -1,0 +1,15 @@
+md-dialog.termsDialog(aria-label='Terms and conditions', layout='column')
+   h1.dialog-title(flex='10') {{'ACCOUNT_TERMS' | translate | uppercase}}
+   md-dialog-content(flex='75')
+      p {{'ACCOUNT_TERMS_INTRO' | translate}}
+      md-list
+         md-list-item(ng-repeat='i in [1, 2, 3, 4, 5, 6, 7, 8]', layout='row',
+         layout-align='start center')
+            .bullet-point.md-primary
+            p {{'ACCOUNT_TERMS_P'+i | translate}}
+      p {{'ACCOUNT_TERMS_CLOSING' | translate}}
+
+   md-dialog-actions(flex='15')
+      md-button(ng-click='answer(false)') {{'ACTION_CANCEL' | translate}}
+      md-button.md-primary(ng-click='answer(true)'
+      ) {{'ACTION_ACCEPT' | translate}}

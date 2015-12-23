@@ -2,10 +2,16 @@
   "name": "nexdoc",
   "version": "0.0.2",
   "dependencies": {
-    "underscore": "*",
-    "angular": "~1.3",
-    "angular-route": "~1.3",
-    "angular-cookies": "~1.3",
-    "angular-translate": "*"
+    "angular": "~1.4",
+    "angular-animate": "~1.4",
+    "angular-aria": "~1.4",
+    "angular-cookies": "~1.4",
+    "angular-css": "~1.0",
+    "angular-material": "~1.0",
+    "angular-material-icons": "~0.6",
+    "angular-messages": "~1.4",
+    "angular-route": "~1.4",
+    "angular-translate": "~2.8",
+    "underscore": "*"
   }
 }
