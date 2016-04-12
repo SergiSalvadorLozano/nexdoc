@@ -83,15 +83,15 @@ var _resolveCheckList = function (req, checkList) {
 
 
 // Resolves a list of checklists. For each of them, if it has the 'flag'
-// property, a boolean is written in 'req.flags' under that name with the
-// verdict. If it also has the 'softFlag' property, only true verdicts
-// write/overwrite the flag on 'req.flags'.
-// Returned promise resolves to an object {verdict: boolean, errName: string}.
-// - verdict is true if none of the checklists has a false verdict.
-// - errName is the name of the error produced by the first checklist to fail.
-// It is always undefined for true verdicts.
+// property (string), a boolean is written in 'req.flags' with that name
+// containing the verdict. If it also has the 'softFlag' property defined, only
+// verdicts with its same boolean value will write/overwrite the flag on
+// 'req.flags'.
+// The returned promise resolves to an object {verdict: boolean, errName: string}.
+// - 'verdict' is true unless all of the checklists have a false verdict.
+// - 'errName' is the name of the error produced by the first checklist to fail.
+//   It is always undefined for true verdicts.
 
-//@todo: update softFlag description in the comment above.
 var _resolveCheckLists = function (req, checkLists) {
   return new Promise(function (resolve, reject) {
     Promise.all(_.map(checkLists, function (cl) {
@@ -101,7 +101,7 @@ var _resolveCheckLists = function (req, checkLists) {
         var finalResult = {verdict: false};
         results.forEach(function (result, index) {
           if (checkLists[index].flag &&
-            checkLists[index].softFlag !== !result.verdict) {
+            checkLists[index].softFlag === result.verdict) {
             req.flags[checkLists[index].flag] = result.verdict;
           }
           if (result.verdict) {
