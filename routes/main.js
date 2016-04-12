@@ -28,7 +28,7 @@ router.use('/api/account', accountRouter);
 // Rendering of the common layout. Other view routing is delegated to
 // client-side code.
 router.get('/*', function (req, res) {
-  res.render('common');
+  res.render('common/main');
 });
 
 

@@ -2,24 +2,34 @@
 
 
 angular.module('nexdocApp').config(function ($routeProvider,
-                                             $locationProvider) {
+                                             $locationProvider, Site) {
 
+
+  _.each(Site.sections, function (sData, sName) {
+    $routeProvider.when('/' + sName, {
+      redirectTo: '/' + sName + '/' + sData.defaultSubsection
+    });
+    _.each(sData.subsections, function (ssData, ssName) {
+      $routeProvider.when('/' + sName + '/' + ssName, {
+        templateUrl: '/partials/' + sName + '/' + ssName
+      });
+    });
+  });
+
+  //$routeProvider
+  //  // Home routes.
+  //  .when('/home', {
+  //    redirectTo: '/home/index'
+  //  });
+  //$routeProvider
+  //  .when('/home/index', {
+  //    templateUrl: 'partials/home/index'
+  //  });
+
+  // Account routes.
+
+  // Other routes.
   $routeProvider
-    // Home routes.
-    .when('/home', {
-      redirectTo: '/home/index'
-    })
-    .when('/home/index', {
-      templateUrl: 'partials/home/index'
-    })
-
-    // Account routes.
-    .when('/signUp', {
-      templateUrl: 'partials/account/signUp',
-      controller: 'SignUpController'
-    })
-
-    // Other routes.
     .otherwise({
       redirectTo: '/home'
     });

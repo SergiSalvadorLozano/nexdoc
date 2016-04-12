@@ -12,16 +12,17 @@ var router = express.Router({mergeParams: true});
 
 // ROUTES
 
-// Account partials.
-router.get('/account/:name', function (req, res) {
-  res.render('partials/account/' + req.params.name);
-});
+//// Common partials.
+//router.get('/common/:name', function (req, res) {
+//  res.render('partials/common/' + req.params.name);
+//});
 
 
-// Home partials.
-router.get('/home/:name', function (req, res) {
-  res.render('partials/home/' + req.params.name);
+// Resources partials.
+router.get('/:category/:name', function (req, res) {
+  res.render('partials/' + req.params.category + '/' + req.params.name);
 });
+
 
 
 module.exports = router;

@@ -1,0 +1,213 @@
+/*
+PRIMARY
+default: #3F51B5
+hue-1: #9FA8DA
+hue-2: #283593
+
+ACCENT
+default: #80D8FF
+
+BACKGROUND
+hue-1: #E8EAF6
+hue-2: #FFFFFF
+
+TEXT: black
+*/
+
+
+/*BACKGROUND COLORS*/
+
+div.md-primary, header.md-primary, main.md-primary, aside.md-primary,
+nav.md-primary, section.md-primary, md-content.md-primary {
+  background-color: #3F51B5; /*Primary*/
+}
+
+div.md-hue-1, header.md-hue-1, main.md-hue-1, aside.md-hue-1, nav.md-hue-1,
+section.md-hue-1, md-content.md-hue-1 {
+  background-color: #9FA8DA; /*Primary hue-1*/
+}
+
+div.md-hue-2, header.md-hue-2, main.md-hue-2, aside.md-hue-2, nav.md-hue-2,
+section.md-hue-2, md-content.md-hue-2 {
+  background-color: #283593; /*Primary hue-2*/
+}
+
+div.md-accent, header.md-accent, main.md-accent, aside.md-accent,
+nav.md-accent, section.md-accent, md-content.md-accent {
+  background-color: #80D8FF; /*Accent*/
+}
+
+div.md-background-1, header.md-background-1, main.md-background-1,
+aside.md-background-1, nav.md-background-1, section.md-background-1,
+md-content.md-background-1 {
+  background-color: #E8EAF6; /*Background hue-1*/
+}
+
+div.md-background-2, header.md-background-2, main.md-background-2,
+aside.md-background-2, nav.md-background-2, section.md-background-2,
+md-content.md-background-2 {
+  background-color: #FFFFFF; /*Background hue-2*/
+}
+
+ng-md-icon.md-primary {
+  fill: #3F51B5; /*Primary*/
+}
+
+ng-md-icon.md-hue-1 {
+  fill: #9FA8DA; /*Primary hue-1*/
+}
+
+ng-md-icon.md-hue-2 {
+  fill: #283593; /*Primary hue-2*/
+}
+
+ng-md-icon.md-accent {
+  fill: #80D8FF; /*Accent*/
+}
+
+ng-md-icon.md-background-1 {
+  fill: #E8EAF6; /*Background hue-1*/
+}
+
+ng-md-icon.md-background-2 {
+  fill: #FFFFFF; /*Background hue-2*/
+}
+
+
+/*GENERAL STYLE FOR ELEMENTS*/
+
+div.bullet-point {
+  border-radius: 50%;
+  height: 8px;
+  width: 8px;
+  margin: 0 20px 0 0;
+  color: black; /*Text*/
+}
+
+.md-button.round-small {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.md-button.round-small ng-md-icon {
+  fill: #3F51B5; /*Primary*/
+  position: absolute;
+  left: 8px;
+  top: 8px;
+}
+
+.md-button.round-small.md-primary ng-md-icon {
+  fill: #FFFFFF; /*Background hue-2*/
+}
+
+md-dialog {
+  width: 600px;
+  height: 600px;
+  padding: 40px;
+}
+
+md-dialog h1 {
+  text-align: center;
+  color: #3F51B5; /*Primary*/
+  font-size: large;
+}
+
+
+/*COMMON LAYOUT STYLE*/
+
+body {
+  min-width: 1280px;
+}
+
+.main-header {
+  height: 80px;
+  z-index: 3;
+}
+
+.main-header .sitename-area {
+  width: 300px; /* Left area width */
+}
+
+.main-header .sitename-area h1 {
+  color: #FFFFFF; /*Background hue-2*/
+}
+
+.main-header .main-nav-area {
+  height: 100%;
+}
+
+.main-header .main-nav {
+  height: 100%;
+}
+
+.main-header .main-nav-element {
+  height: 100%;
+  width: 150px;
+}
+
+.main-header .main-nav-element.selected {
+  background-color: #283593; /*Primary hue-2*/
+}
+
+.main-header .main-nav-element:hover, .main-header .main-nav-element:focus {
+  background-color: #283593; /*Primary hue-2*/
+}
+
+.main-header .language-area {
+  width: 150px;
+}
+
+.main-header .language-area md-select {
+  height: 35px;
+  width: 100px;
+  border-radius: 5px;
+  background-color: #9FA8DA; /*Primary hue-1*/
+  font-weight: bold;
+  color: #FFFFFF; /*Background hue-2*/
+}
+
+.main-header .language-area md-select:focus .md-select-value {
+  color: #283593; /*Primary hue-2*/
+}
+
+.main-header .empty-area {
+  width: 300px; /* Right area width */
+}
+
+.main-avatar {
+  position: relative;
+  top: 20px;
+  left: 20px;
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  background-color: lightslategray;
+}
+
+.subnav {
+  height: 70px;
+  z-index: 1;
+}
+
+.subnav .md-button {
+  font-weight: bold;
+  width: 200px;
+}
+
+.left-area {
+  width: 300px; /* Left area width */
+  z-index: 2;
+}
+
+.main-area {
+  padding: 40px;
+  z-index: 0;
+}
+
+.right-area {
+  z-index: 2;
+  width: 300px; /* Right area width */
+}

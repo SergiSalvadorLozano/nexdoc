@@ -1,0 +1,108 @@
+doctype html
+html(ng-app='nexdocApp', ng-controller='MainController')
+  head
+    title Nexdoc
+    meta(charset='utf8')
+    base(href='/')
+
+    // Stylesheets.
+    link(rel='stylesheet',
+    href='components/angular-material/angular-material.css')
+    link(rel='stylesheet', href='/css/common/main.css')
+
+    // External modules.
+    script(src='components/angular/angular.js')
+    script(src='components/angular-cookies/angular-cookies.js')
+    script(src='components/angular-css/angular-css.js')
+    script(src='components/angular-animate/angular-animate.js')
+    script(src='components/angular-aria/angular-aria.js')
+    script(src='components/angular-material/angular-material.js')
+    script(src='components/angular-material-icons/angular-material-icons.js')
+    script(src='components/angular-route/angular-route.js')
+    script(src='components/angular-translate/angular-translate.js')
+    script(src='components/underscore/underscore.js')
+
+    // Angular app.
+    script(src='/js/app.js')
+
+    // Angular configuration.
+    script(src='/js/config/common.js')
+
+    // Angular routing.
+    script(src='/js/routes/main.js')
+    script(src='/js/routes/main-interceptors.js')
+
+    // Angular services.
+    script(src='/js/services/site.js')
+    script(src='/js/services/utils.js')
+
+    // Angular controllers.
+    script(src='/js/controllers/common/main.js')
+    script(src='/js/controllers/common/subNav.js')
+    script(src='/js/controllers/account/signInUp.js')
+    script(src='/js/controllers/account/termsDialog.js')
+
+    // Angular directives.
+    script(src='/js/directives/common/subNav.js')
+    script(src='/js/directives/account/signInUp.js')
+
+    // Translations
+    script(src='/js/translations/cat.js')
+    script(src='/js/translations/de.js')
+    script(src='/js/translations/en.js')
+    script(src='/js/translations/es.js')
+    script(src='/js/translations/fr.js')
+
+
+  body(layout='column')
+    header.main-header.md-primary(layout='row', flex='none')
+      .sitename-area(flex='none')
+        a(ng-href='/home/{{$root.buildQuery()}}')
+          h1 Nexdoc
+
+      .main-nav-area(flex, layout='row', layout-align='center center')
+        nav.main-nav(layout='row')
+          a.main-nav-element(ng-repeat='(name, data) in $root.sections',
+          ng-if='inMenu(name)', ng-href='{{name + $root.buildQuery()}}',
+          ng-class='name === $root.section ? "selected" : ""', flex='initial',
+          layout='column', layout-align='space-around center')
+            span {{name}}
+            //ng-md-icon(icon='{{data.menuIcon}}', size='35', ng-class=
+            //'name === $root.section ? "md-background-2" : "md-hue-1"')
+
+      .language-area.md-hue-1(flex='none', layout='row',
+      layout-align='center center')
+        md-input-container
+          md-select(aria-label='Language Selector', ng-model='$root.language',
+          md-on-close='onLanguageSelected()')
+            md-option(ng-repeat='language in languages', ng-value='language'
+            ) {{language.name | translate | uppercase}}
+      .empty-area(flex='none')
+
+    div(layout='row', flex)
+      aside.left-area.md-background-2(flex='none')
+
+      md-content.md-background-1(layout='column', flex)
+        nav.subnav.md-background-2.md-whiteframe-z2(flex='none',
+        layout='row', layout-align='space-around-center')
+          md-button.md-primary(
+          ng-repeat='(name, data) in $root.sections[$root.section].subsections',
+          ng-if='inMenu($root.section, name)',
+          ng-href='{{$root.section + "/" + name + $root.buildQuery()}}',
+          ng-class='name === $root.subsection ? "md-hue-2" : "md-hue-1"')
+            span {{data.text | translate | uppercase}}
+
+        main.main-area(ng-view, flex='none')
+
+      aside.right-area.md-hue-1(flex='none', layout='column',
+      layout-align='start center')
+        md-button.md-raised HELLO
+
+
+    //.userArea(ng-if='$root.user')
+    //  p(ng-if='$root.user') {{$root.user.name}}
+    //  md-button.sign-in.md-raised(ng-click='signOut()') {{'ACCOUNT_SIGN_OUT' | translate}}
+    //
+    //nd-sign-in-up(ng-if='!$root.user')
+
+

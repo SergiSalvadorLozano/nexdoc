@@ -20,7 +20,7 @@ angular.module('nexdocApp')
     $mdThemingProvider.theme('default')
     .primaryPalette('indigo', {
       'default': '500',
-      'hue-1': '50',
+      'hue-1': '200',
       'hue-2': '800'
     })
     .accentPalette('light-blue', {

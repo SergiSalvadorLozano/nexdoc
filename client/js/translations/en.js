@@ -7,11 +7,29 @@ angular.module('nexdocApp').config(function ($translateProvider) {
     'ACTION_ACCEPT': 'Accept',
     'ACTION_CANCEL': 'Cancel',
 
-    'LANG_NAME_ENGLISH': 'English',
-    'LANG_NAME_SPANISH': 'Spanish',
-    'LANG_NAME_CATALAN': 'Catalan',
-    'LANG_NAME_FRENCH': 'French',
-    'LANG_NAME_GERMAN': 'German',
+    SECTION_HOME: 'Home',
+    SECTION_USER: 'User',
+    SECTION_CONTACTS: 'Contacts',
+    SECTION_GROUPS: 'Groups',
+    SECTION_CONVERSATIONS: 'Conversations',
+    SECTION_RESOURCES: 'Resources',
+    SUBSECTION_HOME_INDEX: 'Index',
+    SUBSECTION_HOME_BLOG: 'Blog',
+    SUBSECTION_HOME_FAQ: 'FAQ',
+    SUBSECTION_USER_PROFILE: 'Profile',
+    SUBSECTION_USER_SETTINGS: 'Settings',
+    SUBSECTION_CONTACTS_LIST: 'My contacts',
+    SUBSECTION_CONTACTS_REQUESTS: 'Requests',
+    SUBSECTION_CONTACTS_FIND: 'Finder',
+    SUBSECTION_GROUPS_LIST: 'My groups',
+    SUBSECTION_GROUPS_INVITATIONS: 'Invitations',
+    SUBSECTION_GROUPS_FIND: 'Finder',
+    SUBSECTION_GROUPS_NEW: 'New group',
+    SUBSECTION_CONVERSATIONS_LIST: 'My conversations',
+    SUBSECTION_CONVERSATIONS_NEW: 'New conversation',
+    SUBSECTION_RESOURCES_LIST: 'My resources',
+    SUBSECTION_RESOURCES_FIND: 'Finder',
+    SUBSECTION_RESOURCES_NEW: 'New resource',
 
     'ACCOUNT_SIGN_UP': 'Sign up',
     'ACCOUNT_SIGN_IN': 'Sign in',
@@ -44,12 +62,12 @@ angular.module('nexdocApp').config(function ($translateProvider) {
     'ACCOUNT_TERMS_P6': 'We won\'t sell or share any private personal data ' +
     'with third parties. You should, however, be cautious with what personal ' +
     'information you decide to make public (like in any other site), as ' +
-    'neither you nor we will have any control over it once it is so. You can ' +
+    'neither you nor we will have any control over it once it is out. You can ' +
     'find some general advice about this on our FAQ.',
     'ACCOUNT_TERMS_P7': 'You understand that this website can make use of ' +
     'cookies or other forms of local storage in order function properly.',
     'ACCOUNT_TERMS_P8': 'Ultimately, we reserve the right to modify or ' +
-    'extend these terms at any time if we judge it necessary.',
+    'extend these terms at any given time if we judge it necessary.',
     'ACCOUNT_TERMS_CLOSING': 'That\'s about it. Feel welcome to contact the ' +
     'administration team for any question or feedback. We hope you encounter ' +
     'in here an enjoyable and productive experience.',
@@ -60,5 +78,11 @@ angular.module('nexdocApp').config(function ($translateProvider) {
     'USER_PASSWORD': 'Password',
     'USER_PASSWORD_REPEAT': 'Rewrite password',
 
+    'ERROR_SERVER': 'Server error while processing the request.',
+    'ERROR_CREDENTIALS': 'Invalid credentials provided in request.',
+    'ERROR_SESSION': 'Request is using an invalid session.',
+    'ERROR_REQUIRED_INPUT': 'Request is missing one or more required input values.',
+    'ERROR_IDENTITY': 'User identity mismatch.',
+    'ERROR_PERMISSIONS': 'Insufficient permissions for request.',
   });
 });
